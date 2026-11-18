@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Marcador de pádel</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body { display: flex; flex-direction: column; background: #000; color: #fff; font-family: 'Arial Black', Arial, sans-serif; text-align: center; }
+
+  /* Franja superior con los sets */
+  .sets { display: flex; justify-content: center; align-items: center; gap: 40px; padding: 10px; background: #111; border-bottom: 3px solid #333; }
+  .sets .etiqueta { font-size: 2rem; letter-spacing: 6px; color: #aaa; }
+  .sets .valor { font-size: 5rem; line-height: 1; min-width: 80px; }
+  #setsA { color: #ff2a2a; }
+  #setsB { color: #2a8bff; }
+
+  /* Zona principal con los dos lados */
+  .tablero { flex: 1; display: grid; grid-template-columns: 1fr 1fr; }
+  .lado { display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; user-select: none; }
+  .lado.A { color: #ff2a2a; border-right: 3px solid #333; }
+  .lado.B { color: #2a8bff; }
+  .nombre { font-size: 2.2rem; letter-spacing: 4px; color: #888; }
+  .puntos { font-size: 18vw; line-height: 1; text-shadow: 0 0 25px currentColor; }
+  .puntos.chico { font-size: 9vw; }
+  .juegos { font-size: 2.5rem; margin-top: 10px; color: #ccc; }
+  .juegos span { font-size: 4rem; }
+
+  #mensaje { min-height: 3rem; font-size: 2rem; color: #ffd400; padding: 6px; }
+
+  /* Botones inferiores */
+  .pie { display: flex; gap: 10px; padding: 10px; background: #111; }
+  .pie button { flex: 1; font-size: 1.6rem; padding: 18px; border: none; border-radius: 12px; color: #fff; cursor: pointer; }
+  .deshacer { background: #f59e0b; }
+  .reiniciar { background: #555; }
+</style>
+</head>
+<body>
+
+<div class="sets">
+  <div class="valor" id="setsA">0</div>
+  <div class="etiqueta">SETS</div>
+  <div class="valor" id="setsB">0</div>
+</div>
+
+<div id="mensaje"></div>
+
+<div class="tablero">
+  <div class="lado A" onclick="punto('A')">
+    <div class="nombre">PAREJA A</div>
+    <div class="puntos" id="puntosA">0</div>
+    <div class="juegos">JUEGOS <span id="juegosA">0</span></div>
+  </div>
+  <div class="lado B" onclick="punto('B')">
+    <div class="nombre">PAREJA B</div>
+    <div class="puntos" id="puntosB">0</div>
+    <div class="juegos">JUEGOS <span id="juegosB">0</span></div>
+  </div>
+</div>
+
+<div class="pie">
+  <button class="deshacer" onclick="deshacer()">DESHACER</button>
+  <button class="reiniciar" onclick="reiniciar()">REINICIAR</button>
+</div>
+
+<script>
+const ESCALA = [0, 15, 30, 40];
+let estado, historial = [];
+
+function nuevoEstado() {
+  return { pts: {A: 0, B: 0}, juegos: {A: 0, B: 0}, sets: {A: 0, B: 0} };
+}
+estado = nuevoEstado();
+
+function otro(p) { return p === 'A' ? 'B' : 'A'; }
+
+function punto(p) {
+  historial.push(JSON.stringify(estado));
+  const q = otro(p);
+  let msg = '';
+  estado.pts[p]++;
+
+  // Ganar el juego: al menos 4 puntos y 2 de diferencia
+  if (estado.pts[p] >= 4 && estado.pts[p] - estado.pts[q] >= 2) {
+    estado.pts = {A: 0, B: 0};
+    estado.juegos[p]++;
+    msg = 'JUEGO PAREJA ' + p;
+
+    // Ganar el set: 6 juegos con 2 de diferencia, o 7-5 / 7-6
+    const jp = estado.juegos[p], jq = estado.juegos[q];
+    if ((jp >= 6 && jp - jq >= 2) || jp === 7) {
+      estado.sets[p]++;
+      estado.juegos = {A: 0, B: 0};
+      msg = 'SET PAREJA ' + p;
+    }
+  }
+  mostrar(msg);
+}
+
+function textoPuntos(p) {
+  const a = estado.pts[p], b = estado.pts[otro(p)];
+  if (a >= 3 && b >= 3) {
+    if (a === b) return '40';
+    return a > b ? 'VENTAJA' : '40';
+  }
+  return String(ESCALA[a]);
+}
+
+function mostrar(msg) {
+  ['A', 'B'].forEach(p => {
+    const t = textoPuntos(p);
+    const el = document.getElementById('puntos' + p);
+    el.textContent = t;
+    el.classList.toggle('chico', t === 'VENTAJA');
+    document.getElementById('juegos' + p).textContent = estado.juegos[p];
+    document.getElementById('sets' + p).textContent = estado.sets[p];
+  });
+  const a = estado.pts.A, b = estado.pts.B;
+  document.getElementById('mensaje').textContent =
+    msg || ((a >= 3 && b >= 3 && a === b) ? 'IGUALES (40-40)' : '');
+}
+
+function deshacer() {
+  if (historial.length) {
+    estado = JSON.parse(historial.pop());
+    mostrar('');
+  }
+}
+
+function reiniciar() {
+  if (confirm('¿Reiniciar todo el marcador?')) {
+    estado = nuevoEstado();
+    historial = [];
+    mostrar('');
+  }
+}
+
+mostrar('');
+</script>
+</body>
+</html>
