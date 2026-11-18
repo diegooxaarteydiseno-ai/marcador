@@ -9,14 +9,12 @@
   html, body { height: 100%; margin: 0; }
   body { display: flex; flex-direction: column; background: #000; color: #fff; font-family: 'Arial Black', Arial, sans-serif; text-align: center; }
 
-  /* Franja superior con los sets */
   .sets { display: flex; justify-content: center; align-items: center; gap: 40px; padding: 10px; background: #111; border-bottom: 3px solid #333; }
   .sets .etiqueta { font-size: 2rem; letter-spacing: 6px; color: #aaa; }
   .sets .valor { font-size: 5rem; line-height: 1; min-width: 80px; }
   #setsA { color: #ff2a2a; }
   #setsB { color: #2a8bff; }
 
-  /* Zona principal con los dos lados */
   .tablero { flex: 1; display: grid; grid-template-columns: 1fr 1fr; }
   .lado { display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; user-select: none; }
   .lado.A { color: #ff2a2a; border-right: 3px solid #333; }
@@ -29,11 +27,12 @@
 
   #mensaje { min-height: 3rem; font-size: 2rem; color: #ffd400; padding: 6px; }
 
-  /* Botones inferiores */
   .pie { display: flex; gap: 10px; padding: 10px; background: #111; }
   .pie button { flex: 1; font-size: 1.6rem; padding: 18px; border: none; border-radius: 12px; color: #fff; cursor: pointer; }
   .deshacer { background: #f59e0b; }
   .reiniciar { background: #555; }
+  .voz { background: #16a34a; }
+  .voz.apagada { background: #7f1d1d; }
 </style>
 </head>
 <body>
@@ -61,12 +60,14 @@
 
 <div class="pie">
   <button class="deshacer" onclick="deshacer()">DESHACER</button>
+  <button class="voz" id="botonVoz" onclick="alternarVoz()">VOZ: SÍ</button>
   <button class="reiniciar" onclick="reiniciar()">REINICIAR</button>
 </div>
 
 <script>
 const ESCALA = [0, 15, 30, 40];
 let estado, historial = [];
+let vozActiva = true;
 
 function nuevoEstado() {
   return { pts: {A: 0, B: 0}, juegos: {A: 0, B: 0}, sets: {A: 0, B: 0} };
@@ -75,10 +76,29 @@ estado = nuevoEstado();
 
 function otro(p) { return p === 'A' ? 'B' : 'A'; }
 
+// Voz del navegador
+function hablar(texto) {
+  if (!vozActiva || !('speechSynthesis' in window) || !texto) return;
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(texto);
+  u.lang = 'es-ES';
+  u.rate = 1;
+  window.speechSynthesis.speak(u);
+}
+
+function alternarVoz() {
+  vozActiva = !vozActiva;
+  const b = document.getElementById('botonVoz');
+  b.textContent = vozActiva ? 'VOZ: SÍ' : 'VOZ: NO';
+  b.classList.toggle('apagada', !vozActiva);
+  if (!vozActiva) window.speechSynthesis.cancel();
+}
+
 function punto(p) {
   historial.push(JSON.stringify(estado));
   const q = otro(p);
   let msg = '';
+  let dicho = '';
   estado.pts[p]++;
 
   // Ganar el juego: al menos 4 puntos y 2 de diferencia
@@ -86,6 +106,7 @@ function punto(p) {
     estado.pts = {A: 0, B: 0};
     estado.juegos[p]++;
     msg = 'JUEGO PAREJA ' + p;
+    dicho = 'Juego pareja ' + p + '. Juegos, ' + estado.juegos.A + ' ' + estado.juegos.B;
 
     // Ganar el set: 6 juegos con 2 de diferencia, o 7-5 / 7-6
     const jp = estado.juegos[p], jq = estado.juegos[q];
@@ -93,9 +114,23 @@ function punto(p) {
       estado.sets[p]++;
       estado.juegos = {A: 0, B: 0};
       msg = 'SET PAREJA ' + p;
+      dicho = 'Set pareja ' + p + '. Sets, ' + estado.sets.A + ' ' + estado.sets.B;
     }
+  } else {
+    dicho = frasePuntos();
   }
   mostrar(msg);
+  hablar(dicho);
+}
+
+// Texto hablado del marcador dentro de un juego
+function frasePuntos() {
+  const a = estado.pts.A, b = estado.pts.B;
+  if (a >= 3 && b >= 3) {
+    if (a === b) return 'Iguales';
+    return 'Ventaja pareja ' + (a > b ? 'A' : 'B');
+  }
+  return ESCALA[a] + ' ' + ESCALA[b];
 }
 
 function textoPuntos(p) {
@@ -125,6 +160,7 @@ function deshacer() {
   if (historial.length) {
     estado = JSON.parse(historial.pop());
     mostrar('');
+    hablar('Punto anulado. ' + frasePuntos());
   }
 }
 
@@ -133,6 +169,7 @@ function reiniciar() {
     estado = nuevoEstado();
     historial = [];
     mostrar('');
+    hablar('Marcador reiniciado');
   }
 }
 
