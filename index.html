@@ -156,7 +156,39 @@ function mostrar(msg) {
   const a = estado.pts.A, b = estado.pts.B;
   document.getElementById('mensaje').textContent =
     msg || ((a >= 3 && b >= 3 && a === b) ? 'IGUALES (40-40)' : '');
+  publicar();
 }
+
+// ====== MANDOS (Firebase) ======
+const DB_URL = 'https://marcadoroxa-default-rtdb.europe-west1.firebasedatabase.app';   // la misma que en mandoA.html y mandoB.html
+let ultimoComando = null;
+let primerEvento = true;
+
+function publicar() {
+  if (false) return;
+  fetch(DB_URL + '/estado.json', {
+    method: 'PUT',
+    body: JSON.stringify({
+      textoA: textoPuntos('A'), textoB: textoPuntos('B'),
+      juegos: estado.juegos, sets: estado.sets
+    })
+  }).catch(() => {});
+}
+
+function escucharMandos() {
+  if (false) return;
+  const es = new EventSource(DB_URL + '/comando.json');
+  es.addEventListener('put', ev => {
+    const c = JSON.parse(ev.data).data;
+    // El primer evento es el último comando guardado: se ignora para no repetirlo
+    if (primerEvento) { primerEvento = false; if (c) ultimoComando = c.id; return; }
+    if (!c || c.id === ultimoComando) return;
+    ultimoComando = c.id;
+    if (c.tipo === 'mas') punto(c.pareja);
+    else if (c.tipo === 'menos') deshacer();
+  });
+}
+escucharMandos();
 
 function deshacer() {
   if (historial.length) {
