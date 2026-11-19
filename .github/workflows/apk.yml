@@ -1,0 +1,58 @@
+name: Compilar APK
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'inicio.html'
+      - 'index.html'
+      - 'mandoA.html'
+      - 'mandoB.html'
+      - 'package.json'
+      - 'capacitor.config.json'
+      - '.github/workflows/apk.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Preparar carpeta www
+        run: |
+          mkdir www
+          cp inicio.html www/index.html
+          cp index.html www/marcador.html
+          cp mandoA.html mandoB.html www/
+          cp logo.jpg www/ || true
+
+      - name: Instalar y crear proyecto Android
+        run: |
+          npm install
+          npx cap add android
+          npx cap sync android
+
+      - name: Compilar APK
+        run: |
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleDebug
+
+      - name: Publicar APK
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: apk-${{ github.run_number }}
+          name: APK ${{ github.run_number }}
+          files: android/app/build/outputs/apk/debug/app-debug.apk
