@@ -92,6 +92,7 @@
   .led.azul { --c: var(--azul); --dim: #0a1640; }
   .led.grande { font-size: min(66vh, 26vw); }
   .led.medio { font-size: min(24vh, 10vw); }
+  .led.guion { font-size: min(16vh, 6.5vw); }
 
   #mensaje { position: absolute; left: 0; right: 0; bottom: 6px; font-size: 1.4rem; color: var(--amarillo); text-shadow: 0 0 10px var(--amarillo); pointer-events: none; z-index: 2; }
 
@@ -117,12 +118,14 @@
     <div class="fila"><small>SETS</small>
       <div class="par">
         <div class="led azul medio" id="setsA"><span class="off">8</span><span class="on">0</span></div>
+        <div class="led azul guion"><span class="off">-</span><span class="on">-</span></div>
         <div class="led azul medio" id="setsB"><span class="off">8</span><span class="on">0</span></div>
       </div>
     </div>
     <div class="fila"><small>JUEGOS</small>
       <div class="par">
         <div class="led amarillo medio" id="juegosA"><span class="off">8</span><span class="on">0</span></div>
+        <div class="led amarillo guion"><span class="off">-</span><span class="on">-</span></div>
         <div class="led amarillo medio" id="juegosB"><span class="off">8</span><span class="on">0</span></div>
       </div>
     </div>
