@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Padel Pulse</title>
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; margin: 0; }
+  body { display: flex; flex-direction: column; background: #000; color: #fff; font-family: 'Arial Black', Arial, sans-serif; text-align: center; overflow: hidden; }
+
+  :root {
+    --rojo: #ff2a1f;
+    --amarillo: #ffd400;
+    --azul: #2f6bff;
+    --verde: #8dff00;
+  }
+
+  /* ===== Tablero LED (ocupa toda la pantalla, en horizontal) ===== */
+  .panel {
+    flex: 1; margin: 6px; display: grid; grid-template-columns: 1fr 20% 1fr; min-height: 0;
+    background: radial-gradient(ellipse at center, #0b0b0b 0%, #000 75%);
+    border: 5px solid var(--verde); border-radius: 22px;
+    box-shadow: 0 0 10px var(--verde), 0 0 30px rgba(141,255,0,.55), inset 0 0 25px rgba(141,255,0,.25), inset 0 0 60px rgba(0,0,0,.9);
+    position: relative; overflow: hidden;
+  }
+  .panel::after { /* reflejo de cristal */
+    content: ''; position: absolute; inset: 0; pointer-events: none;
+    background: linear-gradient(160deg, rgba(255,255,255,.07) 0%, rgba(255,255,255,0) 35%);
+  }
+
+  .lado { display: flex; flex-direction: column; justify-content: space-around; align-items: center; cursor: pointer; user-select: none; padding: 6px 2px; min-width: 0; }
+  .nombres { display: flex; flex-direction: column; gap: 2px; width: 100%; }
+  .nombres div { display: flex; align-items: center; justify-content: center; gap: 6px; font-size: min(7vh, 4vw); color: #fff; letter-spacing: 2px; text-shadow: 0 0 8px rgba(255,255,255,.55); white-space: nowrap; overflow: hidden; padding: 0 6px; text-transform: uppercase; }
+  .nombres div span { overflow: hidden; text-overflow: ellipsis; }
+  .bola { width: 1.15em; height: 1.15em; flex: none; visibility: hidden; filter: drop-shadow(0 0 6px #d4ff00); }
+  .bola.on { visibility: visible; }
+  .bola svg { width: 100%; height: 100%; display: block; }
+
+  .centro { display: flex; flex-direction: column; justify-content: space-around; align-items: center; padding: 6px 0; min-width: 0; }
+  .fila { display: flex; flex-direction: column; align-items: center; gap: 0; }
+  .fila small { font-size: min(3.2vh, 2vw); letter-spacing: 3px; color: #8a8a8a; }
+  .par { display: flex; gap: 2vw; align-items: center; }
+  .centro .logo { height: min(20vh, 11vw); aspect-ratio: 1 / 1; border-radius: 50%; object-fit: cover; box-shadow: 0 0 14px rgba(141,255,0,.6); }
+  .cambio { display: none; height: min(20vh, 11vw); aspect-ratio: 1 / 1; filter: drop-shadow(0 0 8px var(--verde)) drop-shadow(0 0 18px var(--verde)); animation: parpadeo 1s infinite; }
+  .cambio svg { width: 100%; height: 100%; display: block; }
+  @keyframes parpadeo { 0%, 100% { opacity: 1; } 50% { opacity: .35; } }
+
+  /* ===== Dígitos LED ===== */
+  .led { position: relative; display: inline-block; font-family: 'Arial Black', Impact, sans-serif; font-weight: 900; line-height: 1; letter-spacing: .03em; }
+  .led .on, .led .off {
+    color: transparent;
+    -webkit-background-clip: text; background-clip: text;
+    background-size: .075em .075em;
+  }
+  .led .off { position: absolute; left: 0; top: 0; background-image: radial-gradient(circle at center, var(--dim) 0 36%, transparent 42%); }
+  .led .on { position: relative; background-image: radial-gradient(circle at center, #fff 0 14%, var(--c) 26% 40%, transparent 46%);
+    filter: drop-shadow(0 0 .035em var(--c)) drop-shadow(0 0 .1em var(--c)); }
+  .led.rojo { --c: var(--rojo); --dim: #3a0a07; }
+  .led.amarillo { --c: var(--amarillo); --dim: #3a3000; }
+  .led.azul { --c: var(--azul); --dim: #0a1640; }
+  .led.grande { font-size: min(66vh, 26vw); }
+  .led.medio { font-size: min(24vh, 10vw); }
+
+  #mensaje { position: absolute; left: 0; right: 0; bottom: 6px; font-size: 1.4rem; color: var(--amarillo); text-shadow: 0 0 10px var(--amarillo); pointer-events: none; z-index: 2; }
+
+  /* ===== Tres puntitos + menú desplegable ===== */
+  #botonMenu { position: fixed; top: 14px; right: 14px; z-index: 20; width: 46px; height: 46px; border-radius: 50%; border: 2px solid var(--verde); background: rgba(0,0,0,.75); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; cursor: pointer; box-shadow: 0 0 10px rgba(141,255,0,.5); padding: 0; }
+  #botonMenu span { width: 6px; height: 6px; border-radius: 50%; background: var(--verde); display: block; }
+  #fondoMenu { position: fixed; inset: 0; z-index: 21; display: none; }
+  #fondoMenu.abierto { display: block; }
+  #listaMenu { position: absolute; top: 68px; right: 14px; background: #0b0b0b; border: 2px solid var(--verde); border-radius: 14px; box-shadow: 0 0 20px rgba(141,255,0,.45); overflow-y: auto; max-height: calc(100vh - 80px); min-width: 280px; }
+  #listaMenu button { display: block; width: 100%; text-align: left; padding: 11px 18px; font-size: .95rem; font-family: inherit; color: #fff; background: transparent; border: none; border-bottom: 1px solid #222; cursor: pointer; letter-spacing: 1px; }
+  #listaMenu button:last-child { border-bottom: none; }
+  #listaMenu button:active { background: #1d2a00; }
+  #listaMenu .reiniciar { color: #ff6b6b; }
+
+  /* ===== Ventanas (nombres y saque) ===== */
+  .ventana { position: fixed; inset: 0; background: rgba(0,0,0,.93); display: none; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 16px; z-index: 30; overflow: auto; }
+  .ventana.abierto { display: flex; }
+  .ventana h2 { margin: 0 0 6px; color: var(--verde); letter-spacing: 3px; text-shadow: 0 0 10px var(--verde); font-size: 1.3rem; }
+  .grupo { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: min(640px, 100%); }
+  .grupo label { font-size: .8rem; color: #aaa; display: block; text-align: left; margin-bottom: 3px; }
+  .grupo input { width: 100%; font-size: 1.2rem; padding: 10px; border-radius: 10px; border: 2px solid var(--verde); background: #000; color: #fff; font-family: Arial, sans-serif; }
+  .ventana .cerrar { margin-top: 8px; background: var(--verde); color: #000; font-weight: 900; font-size: 1.1rem; padding: 12px 36px; border: none; border-radius: 12px; cursor: pointer; font-family: inherit; }
+  .ventana .secundario { background: transparent; color: #aaa; border: 2px solid #444; }
+  .elegir { display: grid; gap: 10px; width: min(640px, 100%); }
+  .elegir button { font-size: 1.3rem; padding: 16px 10px; border-radius: 12px; border: 2px solid var(--verde); background: #000; color: #fff; font-family: inherit; text-transform: uppercase; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; }
+  .elegir button:active { background: #1d2a00; }
+  .elegir .bola { visibility: visible; width: 1.3em; height: 1.3em; }
+
+  /* ===== Aviso para girar el móvil ===== */
+  #girar { position: fixed; inset: 0; background: #000; z-index: 50; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 20px; color: var(--verde); font-size: 1.4rem; letter-spacing: 3px; padding: 20px; text-shadow: 0 0 12px var(--verde); }
+  #girar .telefono { width: 60px; height: 100px; border: 5px solid var(--verde); border-radius: 12px; animation: girarTel 2.2s infinite ease-in-out; box-shadow: 0 0 14px var(--verde); }
+  @keyframes girarTel { 0%, 20% { transform: rotate(0); } 60%, 100% { transform: rotate(-90deg); } }
+  @media (orientation: portrait) { #girar { display: flex; } }
+</style>
+</head>
+<body>
+
+<div class="panel">
+  <div class="lado A" onclick="punto('A')">
+    <div class="nombres">
+      <div id="nA0"><i class="bola"></i><span></span></div>
+      <div id="nA1"><i class="bola"></i><span></span></div>
+    </div>
+    <div class="led rojo grande" id="puntosA"><span class="off">88</span><span class="on">0</span></div>
+  </div>
+
+  <div class="centro">
+    <div class="fila"><small>SETS</small>
+      <div class="par">
+        <div class="led azul medio" id="setsA"><span class="off">8</span><span class="on">0</span></div>
+        <div class="led azul medio" id="setsB"><span class="off">8</span><span class="on">0</span></div>
+      </div>
+    </div>
+    <div class="fila"><small>JUEGOS</small>
+      <div class="par">
+        <div class="led amarillo medio" id="juegosA"><span class="off">8</span><span class="on">0</span></div>
+        <div class="led amarillo medio" id="juegosB"><span class="off">8</span><span class="on">0</span></div>
+      </div>
+    </div>
+    <img class="logo" id="logo" src="logo.jpg" alt="Padel Pulse" onerror="this.style.display='none'">
+    <div class="cambio" id="cambio">
+      <svg viewBox="0 0 100 100" fill="none" stroke="#8dff00" stroke-width="9" stroke-linecap="round">
+        <path d="M 22 50 A 28 28 0 0 1 78 50"/>
+        <path d="M 78 50 A 28 28 0 0 1 22 50"/>
+        <polygon points="66,46 90,46 78,62" fill="#8dff00" stroke-width="3" stroke-linejoin="round"/>
+        <polygon points="10,54 34,54 22,38" fill="#8dff00" stroke-width="3" stroke-linejoin="round"/>
+      </svg>
+    </div>
+  </div>
+
+  <div class="lado B" onclick="punto('B')">
+    <div class="nombres">
+      <div id="nB0"><i class="bola"></i><span></span></div>
+      <div id="nB1"><i class="bola"></i><span></span></div>
+    </div>
+    <div class="led rojo grande" id="puntosB"><span class="off">88</span><span class="on">0</span></div>
+  </div>
+
+  <div id="mensaje"></div>
+</div>
+
+<button id="botonMenu" onclick="abrirListaMenu()" aria-label="Menú"><span></span><span></span><span></span></button>
+
+<div id="fondoMenu" onclick="cerrarListaMenu()">
+  <div id="listaMenu" onclick="event.stopPropagation()">
+    <button onclick="cerrarListaMenu(); abrirMenu()">NOMBRES</button>
+    <button onclick="cerrarListaMenu(); abrirSaque(1)">QUIÉN SACA</button>
+    <button id="botonCambio" onclick="alternarCambio(); cerrarListaMenu()">CAMBIO DE CANCHA: SÍ</button>
+    <button id="botonVoz" onclick="alternarVoz(); cerrarListaMenu()">VOZ: SÍ</button>
+    <button id="botonPantalla" onclick="pantallaCompleta(); cerrarListaMenu()">PANTALLA COMPLETA</button>
+    <button onclick="deshacer(); cerrarListaMenu()">DESHACER</button>
+    <button class="reiniciar" onclick="cerrarListaMenu(); reiniciar()">REINICIAR</button>
+  </div>
+</div>
+
+<div id="menu" class="ventana">
+  <h2>NOMBRES</h2>
+  <div class="grupo">
+    <div><label>Pareja izquierda · jugador 1</label><input id="iA1" maxlength="14"></div>
+    <div><label>Pareja derecha · jugador 1</label><input id="iB1" maxlength="14"></div>
+    <div><label>Pareja izquierda · jugador 2</label><input id="iA2" maxlength="14"></div>
+    <div><label>Pareja derecha · jugador 2</label><input id="iB2" maxlength="14"></div>
+  </div>
+  <button class="cerrar" onclick="cerrarMenu()">GUARDAR</button>
+</div>
+
+<div id="ventanaSaque" class="ventana">
+  <h2 id="tituloSaque">¿QUIÉN SACA PRIMERO?</h2>
+  <div class="elegir" id="opcionesSaque"></div>
+  <button class="cerrar secundario" onclick="cerrarSaque()">CANCELAR</button>
+</div>
+
+<div id="girar"><div class="telefono"></div>GIRA EL MÓVIL A HORIZONTAL</div>
+
+<script>
+const ESCALA = [0, 15, 30, 40];
+let estado, historial = [];
+let vozActiva = true;
+let cambioCanchaActivo = true;
+try { if (localStorage.getItem('cambioCancha') === 'no') cambioCanchaActivo = false; } catch (e) {}
+
+const BOLA_SVG = '<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="46" fill="#d4ff00" stroke="#9bbd00" stroke-width="3"/><path d="M 10 28 C 38 40 38 60 10 72" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round"/><path d="M 90 28 C 62 40 62 60 90 72" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round"/></svg>';
+document.querySelectorAll('.bola').forEach(b => { b.innerHTML = BOLA_SVG; });
+
+// ===== Horizontal =====
+function bloquearHorizontal() {
+  try {
+    if (screen.orientation && screen.orientation.lock) screen.orientation.lock('landscape').catch(() => {});
+  } catch (e) {}
+}
+bloquearHorizontal();
+document.addEventListener('click', bloquearHorizontal, { once: true });
+
+// ===== Menú de tres puntitos =====
+function abrirListaMenu() { document.getElementById('fondoMenu').classList.add('abierto'); }
+function cerrarListaMenu() { document.getElementById('fondoMenu').classList.remove('abierto'); }
+
+// ===== Nombres editables =====
+let nombres = { A: ['Jugador 1', 'Jugador 2'], B: ['Jugador 3', 'Jugador 4'] };
+try {
+  const g = JSON.parse(localStorage.getItem('nombresPadel'));
+  if (g && g.A && g.B) nombres = g;
+} catch (e) {}
+
+function nombrePareja(p) { return nombres[p][0] + ' y ' + nombres[p][1]; }
+
+function pintarNombres() {
+  ['A', 'B'].forEach(p => {
+    for (let j = 0; j < 2; j++) {
+      document.querySelector('#n' + p + j + ' span').textContent = nombres[p][j];
+    }
+  });
+  pintarBola();
+}
+
+function pintarBola() {
+  const s = sacador();
+  ['A', 'B'].forEach(p => {
+    for (let j = 0; j < 2; j++) {
+      const on = !!s && s.eq === p && s.j === j;
+      document.querySelector('#n' + p + j + ' .bola').classList.toggle('on', on);
+    }
+  });
+}
+
+function abrirMenu() {
+  document.getElementById('iA1').value = nombres.A[0];
+  document.getElementById('iA2').value = nombres.A[1];
+  document.getElementById('iB1').value = nombres.B[0];
+  document.getElementById('iB2').value = nombres.B[1];
+  document.getElementById('menu').classList.add('abierto');
+}
+
+function cerrarMenu() {
+  const v = id => document.getElementById(id).value.trim();
+  nombres = {
+    A: [v('iA1') || 'Jugador 1', v('iA2') || 'Jugador 2'],
+    B: [v('iB1') || 'Jugador 3', v('iB2') || 'Jugador 4']
+  };
+  try { localStorage.setItem('nombresPadel', JSON.stringify(nombres)); } catch (e) {}
+  document.getElementById('menu').classList.remove('abierto');
+  pintarNombres();
+  publicar();
+}
+
+// ===== Pantalla completa =====
+function pantallaCompleta() {
+  const d = document, el = d.documentElement;
+  const activa = d.fullscreenElement || d.webkitFullscreenElement;
+  try {
+    if (!activa) {
+      const r = (el.requestFullscreen || el.webkitRequestFullscreen).call(el);
+      if (r && r.then) r.then(bloquearHorizontal).catch(() => {});
+    } else {
+      (d.exitFullscreen || d.webkitExitFullscreen).call(d);
+    }
+  } catch (e) {}
+}
+function textoBotonPantalla() {
+  const activa = document.fullscreenElement || document.webkitFullscreenElement;
+  document.getElementById('botonPantalla').textContent = activa ? 'SALIR DE PANTALLA COMPLETA' : 'PANTALLA COMPLETA';
+}
+document.addEventListener('fullscreenchange', textoBotonPantalla);
+document.addEventListener('webkitfullscreenchange', textoBotonPantalla);
+
+function nuevoEstado() {
+  return { pts: {A: 0, B: 0}, juegos: {A: 0, B: 0}, sets: {A: 0, B: 0}, saque: null, tb: false, tbIni: null, cambio: false };
+}
+estado = nuevoEstado();
+
+function otro(p) { return p === 'A' ? 'B' : 'A'; }
+
+// ===== Saque =====
+// estado.saque = { eq: pareja que saca, jug: {A: jugador (0/1) que sacará cuando saque A, B: igual} }
+function sacador() {
+  const s = estado.saque;
+  if (!s) return null;
+  if (!estado.tb) return { eq: s.eq, j: s.jug[s.eq] };
+  // Tie-break: saca 1 punto el primero, luego 2 puntos cada jugador por turnos
+  const ini = estado.tbIni || s;
+  const n = estado.pts.A + estado.pts.B;
+  const k = Math.ceil(n / 2);
+  const eq = (k % 2 === 0) ? ini.eq : otro(ini.eq);
+  const occ = (k % 2 === 0) ? k / 2 : (k - 1) / 2;
+  return { eq: eq, j: ini.jug[eq] ^ (occ % 2) };
+}
+
+let saqueTmp = null;
+function abrirSaque(paso, eqPrimero) {
+  const caja = document.getElementById('opcionesSaque');
+  caja.innerHTML = '';
+  const titulo = document.getElementById('tituloSaque');
+  if (paso === 1) {
+    titulo.textContent = '¿QUIÉN SACA PRIMERO?';
+    caja.style.gridTemplateColumns = '1fr 1fr';
+    [0, 1].forEach(j => ['A', 'B'].forEach(p => {
+      caja.appendChild(botonJugador(p, j, () => elegirSaque(1, p, j)));
+    }));
+  } else {
+    titulo.textContent = '¿QUIÉN SACA DE LA OTRA PAREJA?';
+    caja.style.gridTemplateColumns = '1fr 1fr';
+    const q = otro(eqPrimero);
+    [0, 1].forEach(j => caja.appendChild(botonJugador(q, j, () => elegirSaque(2, q, j))));
+  }
+  document.getElementById('ventanaSaque').classList.add('abierto');
+}
+function botonJugador(p, j, accion) {
+  const b = document.createElement('button');
+  b.textContent = nombres[p][j];
+  b.style.borderColor = p === 'A' ? '#ff2a1f' : '#2f6bff';
+  b.onclick = accion;
+  return b;
+}
+function elegirSaque(paso, p, j) {
+  if (paso === 1) {
+    saqueTmp = { eq: p, jug: { A: 0, B: 0 } };
+    saqueTmp.jug[p] = j;
+    abrirSaque(2, p);
+  } else {
+    saqueTmp.jug[p] = j;
+    estado.saque = saqueTmp;
+    if (estado.tb) estado.tbIni = JSON.parse(JSON.stringify(saqueTmp));
+    saqueTmp = null;
+    cerrarSaque();
+    pintarBola();
+    publicar();
+  }
+}
+function cerrarSaque() { document.getElementById('ventanaSaque').classList.remove('abierto'); }
+
+// ===== Cambio de cancha =====
+function alternarCambio() {
+  cambioCanchaActivo = !cambioCanchaActivo;
+  try { localStorage.setItem('cambioCancha', cambioCanchaActivo ? 'si' : 'no'); } catch (e) {}
+  textoBotonCambio();
+  if (!cambioCanchaActivo) { estado.cambio = false; mostrar(''); }
+}
+function textoBotonCambio() {
+  document.getElementById('botonCambio').textContent = 'CAMBIO DE CANCHA: ' + (cambioCanchaActivo ? 'SÍ' : 'NO');
+}
+
+// Voz del navegador
+function hablar(texto) {
+  if (!vozActiva || !('speechSynthesis' in window) || !texto) return;
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(texto);
+  u.lang = 'es-ES';
+  u.rate = 1;
+  window.speechSynthesis.speak(u);
+}
+
+function alternarVoz() {
+  vozActiva = !vozActiva;
+  document.getElementById('botonVoz').textContent = vozActiva ? 'VOZ: SÍ' : 'VOZ: NO';
+  if (!vozActiva) window.speechSynthesis.cancel();
+}
+
+function punto(p) {
+  historial.push(JSON.stringify(estado));
+  const q = otro(p);
+  let msg = '';
+  let dicho = '';
+  let cambio = false;
+  estado.cambio = false;
+  estado.pts[p]++;
+
+  if (estado.tb) {
+    // ===== Tie-break: a 7 puntos con 2 de diferencia =====
+    if (estado.pts[p] >= 7 && estado.pts[p] - estado.pts[q] >= 2) {
+      estado.juegos[p]++;
+      estado.sets[p]++;
+      msg = 'SET ' + nombrePareja(p).toUpperCase();
+      dicho = 'Set ' + nombrePareja(p) + '. Sets, ' + estado.sets.A + ' ' + estado.sets.B;
+      if (estado.saque && estado.tbIni) {
+        const t = otro(estado.tbIni.eq);  // empieza a sacar quien recibió primero
+        estado.saque = { eq: t, jug: { A: estado.tbIni.jug.A ^ 1, B: estado.tbIni.jug.B ^ 1 } };
+      }
+      estado.juegos = {A: 0, B: 0};
+      estado.pts = {A: 0, B: 0};
+      estado.tb = false;
+      estado.tbIni = null;
+      cambio = true;  // el set termina 7-6 = 13 juegos (impar)
+    } else {
+      dicho = estado.pts.A + ' ' + estado.pts.B;
+      if ((estado.pts.A + estado.pts.B) % 6 === 0) cambio = true;  // cada 6 puntos
+    }
+  } else if (estado.pts[p] >= 4 && estado.pts[p] - estado.pts[q] >= 2) {
+    // ===== Gana el juego =====
+    estado.pts = {A: 0, B: 0};
+    estado.juegos[p]++;
+    msg = 'JUEGO ' + nombrePareja(p).toUpperCase();
+    dicho = 'Juego ' + nombrePareja(p) + '. Juegos, ' + estado.juegos.A + ' ' + estado.juegos.B;
+
+    // El saque pasa a la otra pareja; el que sacó sacará su compañero la próxima vez
+    if (estado.saque) {
+      const s = estado.saque;
+      s.jug[s.eq] ^= 1;
+      s.eq = otro(s.eq);
+    }
+
+    const jp = estado.juegos[p], jq = estado.juegos[q];
+    const total = jp + jq;
+    if (jp >= 6 && jp - jq >= 2) {
+      // Gana el set
+      estado.sets[p]++;
+      estado.juegos = {A: 0, B: 0};
+      msg = 'SET ' + nombrePareja(p).toUpperCase();
+      dicho = 'Set ' + nombrePareja(p) + '. Sets, ' + estado.sets.A + ' ' + estado.sets.B;
+      if (total % 2 === 1) cambio = true;
+    } else if (jp === 6 && jq === 6) {
+      // Empieza el tie-break
+      estado.tb = true;
+      estado.pts = {A: 0, B: 0};
+      estado.tbIni = estado.saque ? JSON.parse(JSON.stringify(estado.saque)) : null;
+      msg = 'TIE-BREAK';
+      dicho += '. Tie-break';
+    } else if (total % 2 === 1) {
+      cambio = true;  // juegos impares: 1, 3, 5, 7, 9, 11
+    }
+  } else {
+    dicho = frasePuntos();
+  }
+
+  if (cambio && cambioCanchaActivo) {
+    estado.cambio = true;
+    dicho += '. Cambio de cancha';
+  }
+  mostrar(msg);
+  hablar(dicho);
+}
+
+// Texto hablado del marcador dentro de un juego
+function frasePuntos() {
+  const a = estado.pts.A, b = estado.pts.B;
+  if (estado.tb) return a + ' ' + b;
+  if (a >= 3 && b >= 3) {
+    if (a === b) return 'Iguales';
+    return 'Ventaja ' + nombrePareja(a > b ? 'A' : 'B');
+  }
+  return ESCALA[a] + ' ' + ESCALA[b];
+}
+
+// Texto que se envía a los mandos (VENTAJA se mantiene igual que antes)
+function textoPuntos(p) {
+  const a = estado.pts[p], b = estado.pts[otro(p)];
+  if (estado.tb) return String(a);
+  if (a >= 3 && b >= 3) {
+    if (a === b) return '40';
+    return a > b ? 'VENTAJA' : '40';
+  }
+  return String(ESCALA[a]);
+}
+
+function ponerLed(id, texto) {
+  document.querySelector('#' + id + ' .on').textContent = texto;
+}
+
+function mostrar(msg) {
+  ['A', 'B'].forEach(p => {
+    const t = textoPuntos(p);
+    ponerLed('puntos' + p, t === 'VENTAJA' ? 'AD' : t);   // en el LED, ventaja = AD
+    ponerLed('juegos' + p, estado.juegos[p]);
+    ponerLed('sets' + p, estado.sets[p]);
+  });
+  const a = estado.pts.A, b = estado.pts.B;
+  document.getElementById('mensaje').textContent =
+    msg || (estado.tb ? 'TIE-BREAK' : ((a >= 3 && b >= 3 && a === b) ? 'IGUALES (40-40)' : ''));
+  // Flechas de cambio de cancha en lugar del logo
+  document.getElementById('cambio').style.display = estado.cambio ? 'block' : 'none';
+  document.getElementById('logo').style.visibility = estado.cambio ? 'hidden' : 'visible';
+  document.getElementById('logo').style.position = estado.cambio ? 'absolute' : '';
+  pintarBola();
+  publicar();
+}
+
+// ====== MANDOS (Firebase) ======
+const DB_URL = 'https://marcadoroxa-default-rtdb.europe-west1.firebasedatabase.app';   // la misma que en mandoA.html y mandoB.html
+let ultimoComando = null;
+let primerEvento = true;
+
+function publicar() {
+  if (false) return;
+  const s = sacador();
+  fetch(DB_URL + '/estado.json', {
+    method: 'PUT',
+    body: JSON.stringify({
+      textoA: textoPuntos('A'), textoB: textoPuntos('B'),
+      juegos: estado.juegos, sets: estado.sets,
+      nombres: nombres,
+      saque: s, cambio: !!estado.cambio, tiebreak: !!estado.tb
+    })
+  }).catch(() => {});
+}
+
+function escucharMandos() {
+  if (false) return;
+  const es = new EventSource(DB_URL + '/comando.json');
+  es.addEventListener('put', ev => {
+    const c = JSON.parse(ev.data).data;
+    // El primer evento es el último comando guardado: se ignora para no repetirlo
+    if (primerEvento) { primerEvento = false; if (c) ultimoComando = c.id; return; }
+    if (!c || c.id === ultimoComando) return;
+    ultimoComando = c.id;
+    if (c.tipo === 'mas') punto(c.pareja);
+    else if (c.tipo === 'menos') deshacer();
+  });
+}
+escucharMandos();
+
+function deshacer() {
+  if (historial.length) {
+    estado = JSON.parse(historial.pop());
+    mostrar('');
+    hablar('Punto anulado. ' + frasePuntos());
+  }
+}
+
+function reiniciar() {
+  if (confirm('¿Reiniciar todo el marcador?')) {
+    estado = nuevoEstado();
+    historial = [];
+    mostrar('');
+    hablar('Marcador reiniciado');
+    abrirSaque(1);
+  }
+}
+
+pintarNombres();
+textoBotonCambio();
+mostrar('');
+abrirSaque(1);   // al empezar: ¿quién saca primero?
+</script>
+</body>
+</html>
