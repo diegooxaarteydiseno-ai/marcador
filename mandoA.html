@@ -71,6 +71,8 @@
   .caja.A { border-top-color: #ff2a2a; }
   .caja.B { border-top-color: #2a8bff; }
   .caja.mio { background: #1c1c1c; }
+  .caja.mio .nombres div { text-shadow: 0 0 6px var(--verde), 0 0 14px var(--verde); animation: brillo 1.6s ease-in-out infinite; }
+  @keyframes brillo { 0%, 100% { text-shadow: 0 0 4px var(--verde), 0 0 8px var(--verde); } 50% { text-shadow: 0 0 8px var(--verde), 0 0 20px var(--verde); } }
   .nombres { display: flex; flex-direction: column; gap: 2px; }
   .nombres div { display: flex; align-items: center; justify-content: flex-start; gap: 6px; font-size: 1.05rem; color: #fff; white-space: nowrap; overflow: hidden; padding: 0 6px; text-transform: uppercase; letter-spacing: 1px; }
   .nombres div span { overflow: hidden; text-overflow: ellipsis; }
@@ -182,7 +184,7 @@ function nombresIniciales() {
 
 function partidoNuevo(nombres, cc) {
   return { v: 0, pts: {A: 0, B: 0}, juegos: {A: 0, B: 0}, sets: {A: 0, B: 0},
-           saque: null, tb: false, tbIni: null, cambio: false, hist: [],
+           saque: null, tb: false, tbIni: null, cambio: false, lados: 0, hist: [],
            nombres: nombres, cc: cc, msg: '', dicho: '' };
 }
 
@@ -201,6 +203,7 @@ function normalizar(d) {
   r.tb = !!d.tb;
   r.tbIni = saque(d.tbIni);
   r.cambio = !!d.cambio;
+  r.lados = d.lados || 0;
   r.hist = Array.isArray(d.hist) ? d.hist : (d.hist ? Object.values(d.hist) : []);
   r.nombres = { A: nom(d.nombres && d.nombres.A, NOMBRES_DEF.A), B: nom(d.nombres && d.nombres.B, NOMBRES_DEF.B) };
   r.cc = d.cc !== false;
@@ -261,7 +264,7 @@ function sacador() {
 
 // ===== Jugadas =====
 function instantanea() {
-  return JSON.stringify({ pts: S.pts, juegos: S.juegos, sets: S.sets, saque: S.saque, tb: S.tb, tbIni: S.tbIni, cambio: S.cambio });
+  return JSON.stringify({ pts: S.pts, juegos: S.juegos, sets: S.sets, saque: S.saque, tb: S.tb, tbIni: S.tbIni, cambio: S.cambio, lados: S.lados });
 }
 
 function terminar(msg, dicho) {
@@ -347,6 +350,7 @@ function accionPunto(p) {
 
   if (cambio && S.cc) {
     S.cambio = true;
+    S.lados++;
     dicho += '. Cambio de cancha';
   }
   terminar(msg, dicho);
@@ -573,6 +577,18 @@ pantallaEncendida();
 document.addEventListener('visibilitychange', () => { if (!document.hidden) pantallaEncendida(); });
 
 
+// Pareja a la que suma este mando ahora: se invierte en cada cambio de cancha
+function parejaActual() { return (S.lados % 2 === 0) ? PAREJA : otro(PAREJA); }
+
+function marcarMia() {
+  const p = parejaActual();
+  ['A', 'B'].forEach(x => {
+    const on = x === p;
+    $('caja' + x).classList.toggle('mio', on);
+    $('fila' + x).classList.toggle('mio', on);
+  });
+}
+
 function refrescar() {
   ['A', 'B'].forEach(p => {
     const t = textoPuntos(p);
@@ -584,16 +600,15 @@ function refrescar() {
   });
   pintarNombres();
   pintarBola();
+  marcarMia();
   $('cambio').style.display = S.cambio ? 'block' : 'none';
   pintarMenu();
 }
 
-$('caja' + PAREJA).classList.add('mio');
-$('fila' + PAREJA).classList.add('mio');
 
 $('mas').addEventListener('click', () => {
   if (navigator.vibrate) navigator.vibrate(60);
-  accionPunto(PAREJA);
+  accionPunto(parejaActual());
 });
 $('menos').addEventListener('click', () => {
   if (navigator.vibrate) navigator.vibrate([40, 40, 40]);
