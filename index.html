@@ -387,7 +387,8 @@ function deshacer() {
 function reiniciar() {
   if (typeof confirm === 'function' && !confirm('¿Reiniciar todo el marcador?')) return;
   const v = S.v + 1;
-  S = partidoNuevo(S.nombres, S.cc);
+  guardarLocal('nombresPadel', '');   // olvidar los nombres guardados en este móvil
+  S = partidoNuevo(clonar(NOMBRES_DEF), S.cc);
   S.v = v;
   S.dicho = 'Marcador reiniciado';
   refrescar();
