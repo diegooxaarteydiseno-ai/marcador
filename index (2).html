@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Padel Pulse</title>
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; margin: 0; }
+  body { display: flex; flex-direction: column; background: #000; color: #fff; font-family: 'Arial Black', Arial, sans-serif; text-align: center; overflow: hidden; }
+
+  :root {
+    --rojo: #ff2a1f;
+    --amarillo: #ffd400;
+    --azul: #2f6bff;
+    --verde: #8dff00;
+  }
+
+  /* ===== Pelota de saque ===== */
+  .bola { width: 1.15em; height: 1.15em; flex: none; visibility: hidden; filter: drop-shadow(0 0 6px #d4ff00); }
+  .bola.on { visibility: visible; }
+  .bola svg { width: 100%; height: 100%; display: block; }
+
+  /* ===== Tres puntitos + menú desplegable ===== */
+  #botonMenu { position: fixed; top: 14px; right: 14px; z-index: 20; width: 46px; height: 46px; border-radius: 50%; border: 2px solid var(--verde); background: rgba(0,0,0,.75); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; cursor: pointer; box-shadow: 0 0 10px rgba(141,255,0,.5); padding: 0; }
+  #botonMenu span { width: 6px; height: 6px; border-radius: 50%; background: var(--verde); display: block; }
+  #fondoMenu { position: fixed; inset: 0; z-index: 21; display: none; }
+  #fondoMenu.abierto { display: block; }
+  #listaMenu { position: absolute; top: 68px; right: 14px; background: #0b0b0b; border: 2px solid var(--verde); border-radius: 14px; box-shadow: 0 0 20px rgba(141,255,0,.45); overflow-y: auto; max-height: calc(100vh - 80px); min-width: 260px; max-width: calc(100vw - 28px); }
+  #listaMenu button { display: block; width: 100%; text-align: left; padding: 11px 18px; font-size: .95rem; font-family: inherit; color: #fff; background: transparent; border: none; border-bottom: 1px solid #222; cursor: pointer; letter-spacing: 1px; }
+  #listaMenu button:last-child { border-bottom: none; }
+  #listaMenu button:active { background: #1d2a00; }
+  #listaMenu .reiniciar { color: #ff6b6b; }
+
+  /* ===== Ventanas (nombres y saque) ===== */
+  .ventana { position: fixed; inset: 0; background: rgba(0,0,0,.93); display: none; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 16px; z-index: 30; overflow: auto; }
+  .ventana.abierto { display: flex; }
+  .ventana h2 { margin: 0 0 6px; color: var(--verde); letter-spacing: 3px; text-shadow: 0 0 10px var(--verde); font-size: 1.3rem; }
+  .grupo { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: min(640px, 100%); }
+  .grupo label { font-size: .8rem; color: #aaa; display: block; text-align: left; margin-bottom: 3px; font-family: Arial, sans-serif; }
+  .grupo input { width: 100%; font-size: 1.2rem; padding: 10px; border-radius: 10px; border: 2px solid var(--verde); background: #000; color: #fff; font-family: Arial, sans-serif; }
+  .ventana .cerrar { margin-top: 8px; background: var(--verde); color: #000; font-weight: 900; font-size: 1.1rem; padding: 12px 36px; border: none; border-radius: 12px; cursor: pointer; font-family: inherit; }
+  .ventana .secundario { background: transparent; color: #aaa; border: 2px solid #444; }
+  .elegir { display: grid; gap: 10px; width: min(640px, 100%); }
+  .elegir button { font-size: 1.2rem; padding: 16px 10px; border-radius: 12px; border: 2px solid var(--verde); background: #000; color: #fff; font-family: inherit; text-transform: uppercase; cursor: pointer; overflow: hidden; text-overflow: ellipsis; }
+  .elegir button:active { background: #1d2a00; }
+
+  /* ===== Punto de conexión (verde = sincronizado) ===== */
+  #conexion { position: fixed; top: 31px; right: 68px; z-index: 20; width: 10px; height: 10px; border-radius: 50%; background: #ff2a1f; box-shadow: 0 0 6px #ff2a1f; }
+  #conexion.ok { background: #16a34a; box-shadow: 0 0 6px #16a34a; }
+
+
+  /* ===== Tablero LED (ocupa toda la pantalla, en horizontal) ===== */
+  .panel {
+    flex: 1; margin: 6px; display: grid; grid-template-columns: 1fr 20% 1fr; min-height: 0;
+    background: radial-gradient(ellipse at center, #0b0b0b 0%, #000 75%);
+    border: 5px solid var(--verde); border-radius: 22px;
+    box-shadow: 0 0 10px var(--verde), 0 0 30px rgba(141,255,0,.55), inset 0 0 25px rgba(141,255,0,.25), inset 0 0 60px rgba(0,0,0,.9);
+    position: relative; overflow: hidden;
+  }
+  .panel::after { /* reflejo de cristal */
+    content: ''; position: absolute; inset: 0; pointer-events: none;
+    background: linear-gradient(160deg, rgba(255,255,255,.07) 0%, rgba(255,255,255,0) 35%);
+  }
+
+  .lado { display: flex; flex-direction: column; justify-content: space-around; align-items: center; cursor: pointer; user-select: none; padding: 6px 2px; min-width: 0; }
+  .nombres { display: flex; flex-direction: column; gap: 2px; width: 100%; }
+  .nombres div { display: flex; align-items: center; justify-content: center; gap: 6px; font-size: min(7vh, 4vw); color: #fff; letter-spacing: 2px; text-shadow: 0 0 8px rgba(255,255,255,.55); white-space: nowrap; overflow: hidden; padding: 0 6px; text-transform: uppercase; }
+  .nombres div span { overflow: hidden; text-overflow: ellipsis; }
+
+  .centro { display: flex; flex-direction: column; justify-content: space-around; align-items: center; padding: 6px 0; min-width: 0; }
+  .fila { display: flex; flex-direction: column; align-items: center; gap: 0; }
+  .fila small { font-size: min(3.2vh, 2vw); letter-spacing: 3px; color: #8a8a8a; }
+  .par { display: flex; gap: 2vw; align-items: center; }
+  .centro .logo { height: min(20vh, 11vw); aspect-ratio: 1 / 1; border-radius: 50%; object-fit: cover; box-shadow: 0 0 14px rgba(141,255,0,.6); }
+  .cambio { display: none; height: min(20vh, 11vw); aspect-ratio: 1 / 1; filter: drop-shadow(0 0 8px var(--verde)) drop-shadow(0 0 18px var(--verde)); animation: parpadeo 1s infinite; }
+  .cambio svg { width: 100%; height: 100%; display: block; }
+  @keyframes parpadeo { 0%, 100% { opacity: 1; } 50% { opacity: .35; } }
+
+  /* ===== Dígitos LED ===== */
+  .led { position: relative; display: inline-block; font-family: 'Arial Black', Impact, sans-serif; font-weight: 900; line-height: 1; letter-spacing: .03em; }
+  .led .on, .led .off {
+    color: transparent;
+    -webkit-background-clip: text; background-clip: text;
+    background-size: .075em .075em;
+  }
+  .led .off { position: absolute; left: 0; top: 0; background-image: radial-gradient(circle at center, var(--dim) 0 36%, transparent 42%); }
+  .led .on { position: relative; background-image: radial-gradient(circle at center, #fff 0 14%, var(--c) 26% 40%, transparent 46%);
+    filter: drop-shadow(0 0 .035em var(--c)) drop-shadow(0 0 .1em var(--c)); }
+  .led.rojo { --c: var(--rojo); --dim: #3a0a07; }
+  .led.amarillo { --c: var(--amarillo); --dim: #3a3000; }
+  .led.azul { --c: var(--azul); --dim: #0a1640; }
+  .led.grande { font-size: min(66vh, 26vw); }
+  .led.medio { font-size: min(24vh, 10vw); }
+
+  #mensaje { position: absolute; left: 0; right: 0; bottom: 6px; font-size: 1.4rem; color: var(--amarillo); text-shadow: 0 0 10px var(--amarillo); pointer-events: none; z-index: 2; }
+
+  /* ===== Aviso para girar el móvil ===== */
+  #girar { position: fixed; inset: 0; background: #000; z-index: 50; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 20px; color: var(--verde); font-size: 1.4rem; letter-spacing: 3px; padding: 20px; text-shadow: 0 0 12px var(--verde); }
+  #girar .telefono { width: 60px; height: 100px; border: 5px solid var(--verde); border-radius: 12px; animation: girarTel 2.2s infinite ease-in-out; box-shadow: 0 0 14px var(--verde); }
+  @keyframes girarTel { 0%, 20% { transform: rotate(0); } 60%, 100% { transform: rotate(-90deg); } }
+  @media (orientation: portrait) { #girar { display: flex; } }
+</style>
+</head>
+<body>
+
+<div class="panel">
+  <div class="lado A" onclick="accionPunto('A')">
+    <div class="nombres">
+      <div id="nA0"><i class="bola"></i><span></span></div>
+      <div id="nA1"><i class="bola"></i><span></span></div>
+    </div>
+    <div class="led rojo grande" id="puntosA"><span class="off">88</span><span class="on">0</span></div>
+  </div>
+
+  <div class="centro">
+    <div class="fila"><small>SETS</small>
+      <div class="par">
+        <div class="led azul medio" id="setsA"><span class="off">8</span><span class="on">0</span></div>
+        <div class="led azul medio" id="setsB"><span class="off">8</span><span class="on">0</span></div>
+      </div>
+    </div>
+    <div class="fila"><small>JUEGOS</small>
+      <div class="par">
+        <div class="led amarillo medio" id="juegosA"><span class="off">8</span><span class="on">0</span></div>
+        <div class="led amarillo medio" id="juegosB"><span class="off">8</span><span class="on">0</span></div>
+      </div>
+    </div>
+    <img class="logo" id="logo" src="logo.jpg" alt="Padel Pulse" onerror="this.style.display='none'">
+    <div class="cambio" id="cambio">
+      <svg viewBox="0 0 100 100" fill="none" stroke="#8dff00" stroke-width="9" stroke-linecap="round">
+        <path d="M 22 50 A 28 28 0 0 1 78 50"/>
+        <path d="M 78 50 A 28 28 0 0 1 22 50"/>
+        <polygon points="66,46 90,46 78,62" fill="#8dff00" stroke-width="3" stroke-linejoin="round"/>
+        <polygon points="10,54 34,54 22,38" fill="#8dff00" stroke-width="3" stroke-linejoin="round"/>
+      </svg>
+    </div>
+  </div>
+
+  <div class="lado B" onclick="accionPunto('B')">
+    <div class="nombres">
+      <div id="nB0"><i class="bola"></i><span></span></div>
+      <div id="nB1"><i class="bola"></i><span></span></div>
+    </div>
+    <div class="led rojo grande" id="puntosB"><span class="off">88</span><span class="on">0</span></div>
+  </div>
+
+  <div id="mensaje"></div>
+</div>
+
+<div id="conexion" title="Conexión"></div>
+<button id="botonMenu" onclick="abrirListaMenu()" aria-label="Menú"><span></span><span></span><span></span></button>
+
+<div id="fondoMenu" onclick="cerrarListaMenu()">
+  <div id="listaMenu" onclick="event.stopPropagation()">
+    <button onclick="cerrarListaMenu(); abrirNombres()">NOMBRES</button>
+    <button onclick="cerrarListaMenu(); abrirSaque(1)">QUIÉN SACA</button>
+    <button id="botonCambio" onclick="alternarCambio(); cerrarListaMenu()">CAMBIO DE CANCHA: SÍ</button>
+    <button id="botonVoz" onclick="alternarVoz(); cerrarListaMenu()">VOZ: SÍ</button>
+    <button id="botonPantalla" onclick="pantallaCompleta(); cerrarListaMenu()">PANTALLA COMPLETA</button>
+    <button onclick="deshacer(); cerrarListaMenu()">DESHACER</button>
+    <button class="reiniciar" onclick="cerrarListaMenu(); reiniciar()">REINICIAR</button>
+  </div>
+</div>
+
+<div id="menu" class="ventana">
+  <h2>NOMBRES</h2>
+  <div class="grupo">
+    <div><label>Pareja A · jugador 1</label><input id="iA1" maxlength="14"></div>
+    <div><label>Pareja B · jugador 1</label><input id="iB1" maxlength="14"></div>
+    <div><label>Pareja A · jugador 2</label><input id="iA2" maxlength="14"></div>
+    <div><label>Pareja B · jugador 2</label><input id="iB2" maxlength="14"></div>
+  </div>
+  <button class="cerrar" onclick="guardarNombres()">GUARDAR</button>
+</div>
+
+<div id="ventanaSaque" class="ventana">
+  <h2 id="tituloSaque">¿QUIÉN SACA PRIMERO?</h2>
+  <div class="elegir" id="opcionesSaque"></div>
+  <button class="cerrar secundario" onclick="cerrarSaque()">CANCELAR</button>
+</div>
+
+
+<div id="girar"><div class="telefono"></div>GIRA EL MÓVIL A HORIZONTAL</div>
+
+<script>
+const VOZ_DEFECTO = true;   // el marcador es el que habla por defecto
+
+// ===== MOTOR COMPARTIDO: marcador y mandos usan exactamente este código =====
+// El partido vive en Firebase (/partido). Cada aparato aplica la jugada, y la envía.
+const DB_URL = 'https://marcadoroxa-default-rtdb.europe-west1.firebasedatabase.app';
+const RUTA = DB_URL + '/partido.json';
+const ESCALA = [0, 15, 30, 40];
+const NOMBRES_DEF = { A: ['Jugador 1', 'Jugador 2'], B: ['Jugador 3', 'Jugador 4'] };
+const MAX_HIST = 30;
+
+function leerLocal(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+function guardarLocal(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+function clonar(x) { return x == null ? x : JSON.parse(JSON.stringify(x)); }
+function otro(p) { return p === 'A' ? 'B' : 'A'; }
+
+function nombresIniciales() {
+  try { const g = JSON.parse(leerLocal('nombresPadel')); if (g && g.A && g.B) return g; } catch (e) {}
+  return clonar(NOMBRES_DEF);
+}
+
+function partidoNuevo(nombres, cc) {
+  return { v: 0, pts: {A: 0, B: 0}, juegos: {A: 0, B: 0}, sets: {A: 0, B: 0},
+           saque: null, tb: false, tbIni: null, cambio: false, hist: [],
+           nombres: nombres, cc: cc, msg: '', dicho: '' };
+}
+
+let S = partidoNuevo(nombresIniciales(), leerLocal('cambioCancha') !== 'no');
+let vozActiva = leerLocal('vozPadel') ? leerLocal('vozPadel') === 'si' : VOZ_DEFECTO;
+
+// Firebase quita los vacíos (listas [] y null): se rellenan al recibir
+function normalizar(d) {
+  const par = o => ({ A: (o && o.A) || 0, B: (o && o.B) || 0 });
+  const saque = s => s ? { eq: s.eq, jug: par(s.jug) } : null;
+  const nom = (x, def) => [ (x && x[0]) || def[0], (x && x[1]) || def[1] ];
+  const r = {};
+  r.v = d.v || 0;
+  r.pts = par(d.pts); r.juegos = par(d.juegos); r.sets = par(d.sets);
+  r.saque = saque(d.saque);
+  r.tb = !!d.tb;
+  r.tbIni = saque(d.tbIni);
+  r.cambio = !!d.cambio;
+  r.hist = Array.isArray(d.hist) ? d.hist : (d.hist ? Object.values(d.hist) : []);
+  r.nombres = { A: nom(d.nombres && d.nombres.A, NOMBRES_DEF.A), B: nom(d.nombres && d.nombres.B, NOMBRES_DEF.B) };
+  r.cc = d.cc !== false;
+  r.msg = d.msg || '';
+  r.dicho = d.dicho || '';
+  return r;
+}
+
+// ===== Voz =====
+function hablar(texto) {
+  if (!vozActiva || !texto || typeof speechSynthesis === 'undefined') return;
+  try {
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(texto);
+    u.lang = 'es-ES';
+    speechSynthesis.speak(u);
+  } catch (e) {}
+}
+
+// ===== Textos =====
+function nombrePareja(p) { return S.nombres[p][0] + ' y ' + S.nombres[p][1]; }
+
+// Texto del punto de cada pareja (VENTAJA se muestra como AD donde falta espacio)
+function textoPuntos(p) {
+  const a = S.pts[p], b = S.pts[otro(p)];
+  if (S.tb) return String(a);
+  if (a >= 3 && b >= 3) {
+    if (a === b) return '40';
+    return a > b ? 'VENTAJA' : '40';
+  }
+  return String(ESCALA[a]);
+}
+
+function frasePuntos() {
+  const a = S.pts.A, b = S.pts.B;
+  if (S.tb) return a + ' ' + b;
+  if (a >= 3 && b >= 3) {
+    if (a === b) return 'Iguales';
+    return 'Ventaja ' + nombrePareja(a > b ? 'A' : 'B');
+  }
+  return ESCALA[a] + ' ' + ESCALA[b];
+}
+
+// ===== Saque =====
+// S.saque = { eq: pareja que saca, jug: { A: jugador (0/1) que saca cuando saca A, B: igual } }
+function sacador() {
+  const s = S.saque;
+  if (!s) return null;
+  if (!S.tb) return { eq: s.eq, j: s.jug[s.eq] };
+  // Tie-break: el primero saca 1 punto, luego 2 puntos cada jugador por turnos
+  const ini = S.tbIni || s;
+  const n = S.pts.A + S.pts.B;
+  const k = Math.ceil(n / 2);
+  const eq = (k % 2 === 0) ? ini.eq : otro(ini.eq);
+  const occ = (k % 2 === 0) ? k / 2 : (k - 1) / 2;
+  return { eq: eq, j: ini.jug[eq] ^ (occ % 2) };
+}
+
+// ===== Jugadas =====
+function instantanea() {
+  return JSON.stringify({ pts: S.pts, juegos: S.juegos, sets: S.sets, saque: S.saque, tb: S.tb, tbIni: S.tbIni, cambio: S.cambio });
+}
+
+function terminar(msg, dicho) {
+  S.v++;
+  S.msg = msg;
+  S.dicho = dicho;
+  refrescar();
+  hablar(dicho);
+  publicar();
+}
+
+// Cambio sin voz (nombres, saque, cambio de cancha sí/no)
+function cambiar() {
+  S.v++;
+  S.dicho = '';
+  refrescar();
+  publicar();
+}
+
+function accionPunto(p) {
+  S.hist.push(instantanea());
+  if (S.hist.length > MAX_HIST) S.hist.shift();
+  const q = otro(p);
+  let msg = '', dicho = '', cambio = false;
+  S.cambio = false;
+  S.pts[p]++;
+
+  if (S.tb) {
+    // ===== Tie-break: a 7 puntos con 2 de diferencia =====
+    if (S.pts[p] >= 7 && S.pts[p] - S.pts[q] >= 2) {
+      S.juegos[p]++;
+      S.sets[p]++;
+      msg = 'SET ' + nombrePareja(p).toUpperCase();
+      dicho = 'Set ' + nombrePareja(p) + '. Sets, ' + S.sets.A + ' ' + S.sets.B;
+      if (S.saque && S.tbIni) {
+        const t = otro(S.tbIni.eq);  // empieza a sacar quien recibió primero
+        S.saque = { eq: t, jug: { A: S.tbIni.jug.A ^ 1, B: S.tbIni.jug.B ^ 1 } };
+      }
+      S.juegos = {A: 0, B: 0};
+      S.pts = {A: 0, B: 0};
+      S.tb = false;
+      S.tbIni = null;
+      cambio = true;  // el set termina 7-6 = 13 juegos (impar)
+    } else {
+      dicho = S.pts.A + ' ' + S.pts.B;
+      if ((S.pts.A + S.pts.B) % 6 === 0) cambio = true;  // cada 6 puntos
+    }
+  } else if (S.pts[p] >= 4 && S.pts[p] - S.pts[q] >= 2) {
+    // ===== Gana el juego =====
+    S.pts = {A: 0, B: 0};
+    S.juegos[p]++;
+    msg = 'JUEGO ' + nombrePareja(p).toUpperCase();
+    dicho = 'Juego ' + nombrePareja(p) + '. Juegos, ' + S.juegos.A + ' ' + S.juegos.B;
+
+    // El saque pasa a la otra pareja; quien sacó, la próxima vez sacará su compañero
+    if (S.saque) {
+      S.saque.jug[S.saque.eq] ^= 1;
+      S.saque.eq = otro(S.saque.eq);
+    }
+
+    const jp = S.juegos[p], jq = S.juegos[q];
+    const total = jp + jq;
+    if (jp >= 6 && jp - jq >= 2) {
+      // Gana el set
+      S.sets[p]++;
+      S.juegos = {A: 0, B: 0};
+      msg = 'SET ' + nombrePareja(p).toUpperCase();
+      dicho = 'Set ' + nombrePareja(p) + '. Sets, ' + S.sets.A + ' ' + S.sets.B;
+      if (total % 2 === 1) cambio = true;
+    } else if (jp === 6 && jq === 6) {
+      // Empieza el tie-break
+      S.tb = true;
+      S.pts = {A: 0, B: 0};
+      S.tbIni = S.saque ? clonar(S.saque) : null;
+      msg = 'TIE-BREAK';
+      dicho += '. Tie-break';
+    } else if (total % 2 === 1) {
+      cambio = true;  // juegos impares: 1, 3, 5, 7, 9, 11
+    }
+  } else {
+    dicho = frasePuntos();
+  }
+
+  if (cambio && S.cc) {
+    S.cambio = true;
+    dicho += '. Cambio de cancha';
+  }
+  terminar(msg, dicho);
+}
+
+function deshacer() {
+  if (!S.hist.length) return;
+  Object.assign(S, JSON.parse(S.hist.pop()));
+  terminar('', 'Punto anulado. ' + frasePuntos());
+}
+
+function reiniciar() {
+  if (typeof confirm === 'function' && !confirm('¿Reiniciar todo el marcador?')) return;
+  const v = S.v + 1;
+  S = partidoNuevo(S.nombres, S.cc);
+  S.v = v;
+  S.dicho = 'Marcador reiniciado';
+  refrescar();
+  hablar(S.dicho);
+  publicar();
+  abrirSaque(1);
+}
+
+// ===== Sincronización con Firebase =====
+let enviando = false, pendiente = false, arrancado = false;
+
+function conexion(ok) { if (typeof alConexion === 'function') alConexion(ok); }
+
+function publicar() {
+  pendiente = true;
+  if (!enviando) enviar();
+}
+
+function enviar() {
+  enviando = true;
+  pendiente = false;
+  fetch(RUTA, { method: 'PUT', body: JSON.stringify(S) })
+    .then(r => { if (!r.ok) throw new Error('http'); conexion(true); })
+    .catch(() => conexion(false))
+    .then(() => { enviando = false; if (pendiente) enviar(); });
+}
+
+// Al abrir: si el partido no tiene saque elegido, se pregunta quién saca
+function arranque() {
+  if (arrancado) return;
+  arrancado = true;
+  if (!S.saque) abrirSaque(1);
+}
+
+function recibir(d) {
+  if (!d) { arranque(); return; }
+  const r = normalizar(d);
+  if (r.v > S.v) {
+    const hablarlo = arrancado && r.dicho;
+    S = r;
+    refrescar();
+    if (hablarlo) hablar(r.dicho);
+  } else if (r.v < S.v && !enviando) {
+    publicar();  // este aparato va por delante (p. ej. jugó sin conexión)
+  }
+  arranque();
+}
+
+function descargar() {
+  fetch(RUTA).then(r => r.json()).then(recibir).catch(() => conexion(false));
+}
+
+function conectar() {
+  let es;
+  try { es = new EventSource(RUTA); } catch (e) { return; }
+  es.addEventListener('put', ev => {
+    conexion(true);
+    let m;
+    try { m = JSON.parse(ev.data); } catch (e) { return; }
+    if (m.path === '/') recibir(m.data); else descargar();
+  });
+  es.addEventListener('patch', () => descargar());
+  es.onerror = () => conexion(false);
+}
+
+function iniciarMotor() {
+  refrescar();
+  conectar();
+  setTimeout(arranque, 4000);   // sin conexión: se juega igualmente en local
+}
+
+
+// ===== INTERFAZ COMPARTIDA: menú de tres puntitos, nombres, saque, pantalla completa =====
+const $ = id => document.getElementById(id);
+
+const BOLA_SVG = '<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="46" fill="#d4ff00" stroke="#9bbd00" stroke-width="3"/><path d="M 10 28 C 38 40 38 60 10 72" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round"/><path d="M 90 28 C 62 40 62 60 90 72" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round"/></svg>';
+document.querySelectorAll('.bola').forEach(b => { b.innerHTML = BOLA_SVG; });
+
+function alConexion(ok) { $('conexion').classList.toggle('ok', !!ok); }
+
+// ----- Menú -----
+function abrirListaMenu() { pintarMenu(); $('fondoMenu').classList.add('abierto'); }
+function cerrarListaMenu() { $('fondoMenu').classList.remove('abierto'); }
+
+function pintarMenu() {
+  $('botonCambio').textContent = 'CAMBIO DE CANCHA: ' + (S.cc ? 'SÍ' : 'NO');
+  $('botonVoz').textContent = 'VOZ: ' + (vozActiva ? 'SÍ' : 'NO');
+  const activa = document.fullscreenElement || document.webkitFullscreenElement;
+  $('botonPantalla').textContent = activa ? 'SALIR DE PANTALLA COMPLETA' : 'PANTALLA COMPLETA';
+}
+
+// ----- Nombres y pelota de saque -----
+function pintarNombres() {
+  ['A', 'B'].forEach(p => {
+    for (let j = 0; j < 2; j++) $('n' + p + j).querySelector('span').textContent = S.nombres[p][j];
+  });
+}
+
+function pintarBola() {
+  const s = sacador();
+  ['A', 'B'].forEach(p => {
+    for (let j = 0; j < 2; j++) {
+      const on = !!s && s.eq === p && s.j === j;
+      $('n' + p + j).querySelector('.bola').classList.toggle('on', on);
+    }
+  });
+}
+
+function abrirNombres() {
+  $('iA1').value = S.nombres.A[0];
+  $('iA2').value = S.nombres.A[1];
+  $('iB1').value = S.nombres.B[0];
+  $('iB2').value = S.nombres.B[1];
+  $('menu').classList.add('abierto');
+}
+
+function guardarNombres() {
+  const v = id => $(id).value.trim();
+  S.nombres = {
+    A: [v('iA1') || 'Jugador 1', v('iA2') || 'Jugador 2'],
+    B: [v('iB1') || 'Jugador 3', v('iB2') || 'Jugador 4']
+  };
+  guardarLocal('nombresPadel', JSON.stringify(S.nombres));
+  $('menu').classList.remove('abierto');
+  cambiar();
+}
+
+// ----- Quién saca -----
+let saqueTmp = null;
+
+function abrirSaque(paso, eqPrimero) {
+  const caja = $('opcionesSaque');
+  caja.innerHTML = '';
+  caja.style.gridTemplateColumns = '1fr 1fr';
+  if (paso === 1) {
+    $('tituloSaque').textContent = '¿QUIÉN SACA PRIMERO?';
+    [0, 1].forEach(j => ['A', 'B'].forEach(p => {
+      caja.appendChild(botonJugador(p, j, () => elegirSaque(1, p, j)));
+    }));
+  } else {
+    $('tituloSaque').textContent = '¿QUIÉN SACA DE LA OTRA PAREJA?';
+    const q = otro(eqPrimero);
+    [0, 1].forEach(j => caja.appendChild(botonJugador(q, j, () => elegirSaque(2, q, j))));
+  }
+  $('ventanaSaque').classList.add('abierto');
+}
+
+function botonJugador(p, j, accion) {
+  const b = document.createElement('button');
+  b.textContent = S.nombres[p][j];
+  b.style.borderColor = p === 'A' ? '#ff2a1f' : '#2f6bff';
+  b.onclick = accion;
+  return b;
+}
+
+function elegirSaque(paso, p, j) {
+  if (paso === 1) {
+    saqueTmp = { eq: p, jug: { A: 0, B: 0 } };
+    saqueTmp.jug[p] = j;
+    abrirSaque(2, p);
+  } else {
+    saqueTmp.jug[p] = j;
+    S.saque = saqueTmp;
+    if (S.tb) S.tbIni = clonar(saqueTmp);
+    saqueTmp = null;
+    cerrarSaque();
+    cambiar();
+  }
+}
+
+function cerrarSaque() { $('ventanaSaque').classList.remove('abierto'); }
+
+// ----- Cambio de cancha, voz, pantalla completa -----
+function alternarCambio() {
+  S.cc = !S.cc;
+  guardarLocal('cambioCancha', S.cc ? 'si' : 'no');
+  if (!S.cc) S.cambio = false;
+  cambiar();
+}
+
+function alternarVoz() {
+  vozActiva = !vozActiva;
+  guardarLocal('vozPadel', vozActiva ? 'si' : 'no');
+  if (!vozActiva && typeof speechSynthesis !== 'undefined') speechSynthesis.cancel();
+  pintarMenu();
+}
+
+function pantallaCompleta() {
+  const d = document, el = d.documentElement;
+  const activa = d.fullscreenElement || d.webkitFullscreenElement;
+  try {
+    if (!activa) {
+      const f = el.requestFullscreen || el.webkitRequestFullscreen;
+      const r = f && f.call(el);
+      if (r && r.then && typeof bloquearHorizontal === 'function') r.then(bloquearHorizontal).catch(() => {});
+    } else {
+      (d.exitFullscreen || d.webkitExitFullscreen).call(d);
+    }
+  } catch (e) {}
+}
+document.addEventListener('fullscreenchange', pintarMenu);
+document.addEventListener('webkitfullscreenchange', pintarMenu);
+
+// ----- Mantener la pantalla encendida -----
+async function pantallaEncendida() {
+  try { if (navigator.wakeLock) await navigator.wakeLock.request('screen'); } catch (e) {}
+}
+pantallaEncendida();
+document.addEventListener('visibilitychange', () => { if (!document.hidden) pantallaEncendida(); });
+
+
+// ===== Horizontal =====
+function bloquearHorizontal() {
+  try {
+    if (screen.orientation && screen.orientation.lock) screen.orientation.lock('landscape').catch(() => {});
+  } catch (e) {}
+}
+bloquearHorizontal();
+document.addEventListener('click', bloquearHorizontal, { once: true });
+
+// ===== Pintar el tablero =====
+function ponerLed(id, texto) { $(id).querySelector('.on').textContent = texto; }
+
+function refrescar() {
+  ['A', 'B'].forEach(p => {
+    const t = textoPuntos(p);
+    ponerLed('puntos' + p, t === 'VENTAJA' ? 'AD' : t);   // en el LED, ventaja = AD
+    ponerLed('juegos' + p, S.juegos[p]);
+    ponerLed('sets' + p, S.sets[p]);
+  });
+  const a = S.pts.A, b = S.pts.B;
+  $('mensaje').textContent =
+    S.msg || (S.tb ? 'TIE-BREAK' : ((a >= 3 && b >= 3 && a === b) ? 'IGUALES (40-40)' : ''));
+  // Flechas de cambio de cancha en lugar del logo
+  $('cambio').style.display = S.cambio ? 'block' : 'none';
+  $('logo').style.visibility = S.cambio ? 'hidden' : 'visible';
+  $('logo').style.position = S.cambio ? 'absolute' : '';
+  pintarNombres();
+  pintarBola();
+  pintarMenu();
+}
+
+iniciarMotor();
+</script>
+</body>
+</html>
