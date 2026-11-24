@@ -55,9 +55,9 @@
 
   /* Mini tablero: sets, juegos y punto actual */
   .tablero { border-collapse: collapse; flex: 1; min-width: 0; }
-  .tablero th { font-size: .6rem; color: #888; letter-spacing: 1px; font-weight: 400; padding: 0 4px; font-family: Arial, sans-serif; }
-  .tablero td { padding: 1px 4px; font-size: 1.2rem; line-height: 1.15; }
-  .tablero td.eq { font-size: .8rem; width: 1.6em; }
+  .tablero th { font-size: .75rem; color: #888; letter-spacing: 1px; font-weight: 400; padding: 0 4px; font-family: Arial, sans-serif; }
+  .tablero td { padding: 1px 6px; font-size: 1.8rem; line-height: 1.15; }
+  .tablero td.eq { font-size: 1.1rem; width: 1.6em; }
   .tablero tr.fA td { color: #ff2a2a; }
   .tablero tr.fB td { color: #2a8bff; }
   .tablero tr.mio td { background: #1f1f1f; }
@@ -87,7 +87,7 @@
   /* destello pequeño abajo */
   .mas::after, .menos::after { content: ''; position: absolute; left: 12%; right: 12%; bottom: 3%; height: 14%; border-radius: 50%; background: linear-gradient(0deg, rgba(255,255,255,.22), rgba(255,255,255,0)); pointer-events: none; }
 
-  .mas { flex: 1; margin: 12px 12px 18px; border-radius: 28px; font-size: 9rem;
+  .mas { width: 100%; height: 100%; margin: 0; border-radius: 22px; font-size: 5.5rem;
     background: radial-gradient(120% 90% at 50% 0%, #6dff9a 0%, #22c55e 28%, #15803d 68%, #0b4f26 100%);
     text-shadow: 0 -3px 0 rgba(255,255,255,.25), 0 6px 8px rgba(0,0,0,.55), 0 0 18px rgba(190,255,210,.35);
     box-shadow:
@@ -109,7 +109,7 @@
       0 8px 12px rgba(0,0,0,.8),
       0 0 14px rgba(34,197,94,.25);
     filter: brightness(.93); }
-  .menos { margin: 0 12px 24px; height: 74px; border-radius: 20px; font-size: 3rem;
+  .menos { width: 100%; height: 100%; margin: 0; border-radius: 22px; font-size: 4.5rem;
     background: radial-gradient(120% 110% at 50% 0%, #ff8a80 0%, #ef4444 30%, #b91c1c 70%, #6b0f0f 100%);
     text-shadow: 0 -2px 0 rgba(255,255,255,.25), 0 4px 6px rgba(0,0,0,.55), 0 0 12px rgba(255,200,200,.3);
     box-shadow:
@@ -131,6 +131,16 @@
       0 6px 9px rgba(0,0,0,.8),
       0 0 10px rgba(239,68,68,.2);
     filter: brightness(.93); }
+  /* ===== Zona de cámara (suma el punto al acercar la pala) ===== */
+  .camara { position: relative; flex: 1; min-height: 0; margin: 12px 12px 18px; border-radius: 22px; overflow: hidden; border: 3px solid var(--verde); background: #061200; box-shadow: 0 0 18px rgba(141,255,0,.35); cursor: pointer; transition: background .15s ease, border-color .15s ease; }
+  .camara video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: .45; }
+  .camTexto { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 12px; font-size: 1.4rem; letter-spacing: 2px; color: var(--verde); text-shadow: 0 0 10px rgba(0,0,0,.9); pointer-events: none; }
+  .camBarra { position: absolute; left: 12px; right: 12px; bottom: 10px; height: 8px; border-radius: 4px; background: rgba(255,255,255,.15); overflow: hidden; }
+  .camBarra i { display: block; height: 100%; width: 0; background: var(--verde); }
+  .camara.tapando { border-color: var(--amarillo); }
+  .camara.punto { background: #22c55e; border-color: #fff; }
+  .camara.punto .camTexto { color: #000; text-shadow: none; font-size: 3rem; }
+  .botones { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 0 12px 28px; height: 120px; flex: none; }
 </style>
 </head>
 <body>
@@ -169,8 +179,16 @@
   </div>
 </div>
 
-<button class="mas" id="mas">+</button>
-<button class="menos" id="menos">−</button>
+<div class="camara" id="camara">
+  <video id="video" playsinline muted autoplay></video>
+  <div class="camTexto" id="camTexto">TOCA PARA ACTIVAR LA CÁMARA</div>
+  <div class="camBarra"><i id="camNivel"></i></div>
+</div>
+
+<div class="botones">
+  <button class="menos" id="menos">−</button>
+  <button class="mas" id="mas">+</button>
+</div>
 
 <div id="conexion" title="Conexión"></div>
 <button id="botonMenu" onclick="abrirListaMenu()" aria-label="Menú"><span></span><span></span><span></span></button>
@@ -181,6 +199,8 @@
     <button onclick="cerrarListaMenu(); abrirSaque(1)">QUIÉN SACA</button>
     <button id="botonCambio" onclick="alternarCambio(); cerrarListaMenu()">CAMBIO DE CANCHA: SÍ</button>
     <button id="botonVoz" onclick="alternarVoz(); cerrarListaMenu()">VOZ: SÍ</button>
+    <button id="botonCamara" onclick="alternarCamara(); cerrarListaMenu()">CÁMARA: SÍ</button>
+    <button id="botonSens" onclick="alternarSens()">SENSIBILIDAD: MEDIA</button>
     <button id="botonPantalla" onclick="pantallaCompleta(); cerrarListaMenu()">PANTALLA COMPLETA</button>
     <button onclick="deshacer(); cerrarListaMenu()">DESHACER</button>
     <button class="reiniciar" onclick="cerrarListaMenu(); reiniciar()">REINICIAR</button>
@@ -501,6 +521,8 @@ function cerrarListaMenu() { $('fondoMenu').classList.remove('abierto'); }
 function pintarMenu() {
   $('botonCambio').textContent = 'CAMBIO DE CANCHA: ' + (S.cc ? 'SÍ' : 'NO');
   $('botonVoz').textContent = 'VOZ: ' + (vozActiva ? 'SÍ' : 'NO');
+  $('botonCamara').textContent = 'CÁMARA: ' + (camActiva ? 'SÍ' : 'NO');
+  $('botonSens').textContent = 'SENSIBILIDAD: ' + sens.toUpperCase();
   const activa = document.fullscreenElement || document.webkitFullscreenElement;
   $('botonPantalla').textContent = activa ? 'SALIR DE PANTALLA COMPLETA' : 'PANTALLA COMPLETA';
 }
@@ -652,6 +674,134 @@ function refrescar() {
   $('cambio').style.display = S.cambio ? 'block' : 'none';
   pintarMenu();
 }
+
+
+// ===== CÁMARA: al acercar la pala al objetivo se suma el punto =====
+// Se compara cada píxel con cómo se veía antes. Si casi toda la imagen se oscurece
+// de golpe (la pala tapa el objetivo; los agujeros dejan pasar algo de luz) y
+// se mantiene CAM_TAPADO_MS, cuenta un punto. Después hay un bloqueo de CAM_BLOQUEO_MS.
+const CAM_W = 32, CAM_H = 24;
+const CAM_TAPADO_MS = 300;      // tiempo que debe estar tapada la cámara
+const CAM_BLOQUEO_MS = 2000;    // descanso después de cada punto
+const CAM_RELEARN_MS = 4000;    // si queda tapada mucho rato, se vuelve a aprender la luz
+// caida: un píxel cuenta como tapado si baja de esa fracción de su luz normal
+// cuanto: fracción de píxeles tapados necesaria
+const SENSIBILIDADES = { alta: { caida: 0.65, cuanto: 0.60 }, media: { caida: 0.50, cuanto: 0.70 }, baja: { caida: 0.35, cuanto: 0.80 } };
+
+let camActiva = leerLocal('camPadel') !== 'no';
+let sens = SENSIBILIDADES[leerLocal('sensPadel')] ? leerLocal('sensPadel') : 'media';
+let camStream = null, camTimer = null, camBase = null, camLum = null;
+let camDesde = 0, camArmado = true, camBloqueoHasta = 0, camFlash = null;
+const camCanvas = document.createElement('canvas');
+camCanvas.width = CAM_W; camCanvas.height = CAM_H;
+const camCtx = camCanvas.getContext('2d', { willReadFrequently: true });
+
+function textoCam(t) { $('camTexto').textContent = t; }
+
+async function iniciarCamara() {
+  if (!camActiva || camStream) return;
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    textoCam('LA CÁMARA NECESITA HTTPS'); return;
+  }
+  try {
+    camStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: 'user', width: { ideal: 320 }, height: { ideal: 240 } }, audio: false
+    });
+    const v = $('video');
+    v.srcObject = camStream;
+    await v.play();
+    camBase = null; camDesde = 0; camArmado = true;
+    camTimer = setInterval(analizarCamara, 50);
+    textoCam('ACERCA LA PALA');
+  } catch (e) {
+    camStream = null;
+    textoCam('SIN PERMISO DE CÁMARA · TOCA PARA REINTENTAR');
+  }
+}
+
+function pararCamara() {
+  if (camTimer) { clearInterval(camTimer); camTimer = null; }
+  if (camStream) { camStream.getTracks().forEach(t => t.stop()); camStream = null; }
+  $('video').srcObject = null;
+  camBase = null;
+  $('camara').classList.remove('tapando');
+  $('camNivel').style.width = '0';
+}
+
+function analizarCamara() {
+  const v = $('video');
+  if (v.readyState < 2) return;
+  camCtx.drawImage(v, 0, 0, CAM_W, CAM_H);
+  const d = camCtx.getImageData(0, 0, CAM_W, CAM_H).data;
+  const n = CAM_W * CAM_H;
+  if (!camLum) camLum = new Float32Array(n);
+  for (let i = 0; i < n; i++) camLum[i] = 0.299 * d[i*4] + 0.587 * d[i*4+1] + 0.114 * d[i*4+2] + 1;
+  if (!camBase) { camBase = Float32Array.from(camLum); return; }
+
+  const cfg = SENSIBILIDADES[sens];
+  let tapados = 0;
+  for (let i = 0; i < n; i++) if (camLum[i] < camBase[i] * cfg.caida) tapados++;
+  const frac = tapados / n;
+  const ahora = performance.now();
+  const cubierto = frac >= cfg.cuanto;
+  $('camNivel').style.width = Math.min(100, Math.round(frac * 100)) + '%';
+  $('camara').classList.toggle('tapando', cubierto);
+
+  if (!cubierto) {
+    for (let i = 0; i < n; i++) camBase[i] += (camLum[i] - camBase[i]) * 0.05;  // sigue los cambios lentos de luz
+    camDesde = 0;
+    if (!camArmado && ahora > camBloqueoHasta) { camArmado = true; textoCam('ACERCA LA PALA'); }
+  } else {
+    if (!camDesde) camDesde = ahora;
+    if (camArmado && ahora - camDesde >= CAM_TAPADO_MS) {
+      camArmado = false;
+      camBloqueoHasta = ahora + CAM_BLOQUEO_MS;
+      puntoCamara();
+    } else if (ahora - camDesde > CAM_RELEARN_MS) {
+      camBase = Float32Array.from(camLum); camDesde = 0;   // cambio de luz permanente: reaprender
+    }
+  }
+}
+
+function puntoCamara() {
+  // No sumar si hay una ventana o el menú abiertos
+  if (document.querySelector('.ventana.abierto') || $('fondoMenu').classList.contains('abierto')) return;
+  if (navigator.vibrate) navigator.vibrate(60);
+  accionPunto(parejaActual());
+  const c = $('camara');
+  c.classList.add('punto');
+  textoCam('¡PUNTO!');
+  clearTimeout(camFlash);
+  camFlash = setTimeout(() => { c.classList.remove('punto'); textoCam('ESPERA...'); }, 500);
+}
+
+function alternarCamara() {
+  camActiva = !camActiva;
+  guardarLocal('camPadel', camActiva ? 'si' : 'no');
+  if (camActiva) { textoCam('ACTIVANDO CÁMARA...'); iniciarCamara(); }
+  else { pararCamara(); textoCam('CÁMARA APAGADA · TOCA PARA ACTIVAR'); }
+  pintarMenu();
+}
+
+function alternarSens() {
+  const orden = ['baja', 'media', 'alta'];
+  sens = orden[(orden.indexOf(sens) + 1) % orden.length];
+  guardarLocal('sensPadel', sens);
+  pintarMenu();
+}
+
+$('camara').addEventListener('click', () => {
+  if (!camActiva) { camActiva = true; guardarLocal('camPadel', 'si'); pintarMenu(); }
+  if (!camStream) { textoCam('ACTIVANDO CÁMARA...'); iniciarCamara(); }
+});
+
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) return;
+  const t = camStream && camStream.getVideoTracks()[0];
+  if (camStream && (!t || t.readyState === 'ended')) { pararCamara(); iniciarCamara(); }
+});
+
+if (camActiva) iniciarCamara(); else textoCam('CÁMARA APAGADA · TOCA PARA ACTIVAR');
 
 
 $('mas').addEventListener('click', () => {
