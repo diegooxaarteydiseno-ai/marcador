@@ -72,6 +72,10 @@
   .fila { display: flex; flex-direction: column; align-items: center; gap: 0; }
   .fila small { font-size: min(3.2vh, 2vw); letter-spacing: 3px; color: #8a8a8a; }
   .par { display: flex; gap: 2vw; align-items: center; }
+  .histTV { display: flex; flex-direction: column; align-items: center; gap: 0; }
+  .histTV small { font-size: min(3.2vh, 2vw); letter-spacing: 3px; color: #8a8a8a; }
+  .histTV .set { font-size: min(7vh, 3.6vw); color: var(--amarillo); text-shadow: 0 0 10px rgba(255,212,0,.6); letter-spacing: 2px; white-space: nowrap; line-height: 1.1; }
+  .histTV .set i { font-style: normal; font-size: .55em; color: #fff; text-shadow: none; margin-left: .3em; }
   .centro .logo { height: min(20vh, 11vw); aspect-ratio: 1 / 1; border-radius: 50%; object-fit: cover; box-shadow: 0 0 14px rgba(141,255,0,.6); }
   .cambio { display: none; height: min(20vh, 11vw); aspect-ratio: 1 / 1; filter: drop-shadow(0 0 8px var(--verde)) drop-shadow(0 0 18px var(--verde)); animation: parpadeo 1s infinite; }
   .cambio svg { width: 100%; height: 100%; display: block; }
@@ -129,6 +133,7 @@
         <div class="led amarillo medio" id="juegosB"><span class="off">8</span><span class="on">0</span></div>
       </div>
     </div>
+    <div class="histTV" id="histTV"></div>
     <img class="logo" id="logo" src="logo.jpg" alt="Padel Pulse" onerror="this.style.display='none'">
     <div class="cambio" id="cambio">
       <svg viewBox="0 0 100 100" fill="none" stroke="#8dff00" stroke-width="9" stroke-linecap="round">
@@ -209,7 +214,7 @@ function nombresIniciales() {
 
 function partidoNuevo(nombres, cc) {
   return { v: 0, pts: {A: 0, B: 0}, juegos: {A: 0, B: 0}, sets: {A: 0, B: 0},
-           saque: null, tb: false, tbIni: null, cambio: false, lados: 0, hist: [],
+           saque: null, tb: false, tbIni: null, cambio: false, lados: 0, hist: [], ant: [],
            nombres: nombres, cc: cc, msg: '', dicho: '' };
 }
 
@@ -229,6 +234,7 @@ function normalizar(d) {
   r.tbIni = saque(d.tbIni);
   r.cambio = !!d.cambio;
   r.lados = d.lados || 0;
+  r.ant = Array.isArray(d.ant) ? d.ant : (d.ant ? Object.values(d.ant) : []);
   r.hist = Array.isArray(d.hist) ? d.hist : (d.hist ? Object.values(d.hist) : []);
   r.nombres = { A: nom(d.nombres && d.nombres.A, NOMBRES_DEF.A), B: nom(d.nombres && d.nombres.B, NOMBRES_DEF.B) };
   r.cc = d.cc !== false;
@@ -264,12 +270,16 @@ function textoPuntos(p) {
 
 function frasePuntos() {
   const a = S.pts.A, b = S.pts.B;
-  if (S.tb) return a + ' ' + b;
+  // El tanteo se canta empezando por la pareja que saca (15-0, 0-15...)
+  const sc = sacador();
+  const p1 = sc ? sc.eq : 'A', p2 = otro(p1);
+  const x = S.pts[p1], y = S.pts[p2];
+  if (S.tb) return x + ' ' + y;
   if (a >= 3 && b >= 3) {
     if (a === b) return 'Iguales';
     return 'Ventaja ' + nombrePareja(a > b ? 'A' : 'B');
   }
-  return ESCALA[a] + ' ' + ESCALA[b];
+  return ESCALA[x] + ' ' + ESCALA[y];
 }
 
 // ===== Saque =====
@@ -289,7 +299,7 @@ function sacador() {
 
 // ===== Jugadas =====
 function instantanea() {
-  return JSON.stringify({ pts: S.pts, juegos: S.juegos, sets: S.sets, saque: S.saque, tb: S.tb, tbIni: S.tbIni, cambio: S.cambio, lados: S.lados });
+  return JSON.stringify({ pts: S.pts, juegos: S.juegos, sets: S.sets, saque: S.saque, tb: S.tb, tbIni: S.tbIni, cambio: S.cambio, lados: S.lados, ant: S.ant });
 }
 
 function terminar(msg, dicho) {
@@ -322,6 +332,7 @@ function accionPunto(p) {
     if (S.pts[p] >= 7 && S.pts[p] - S.pts[q] >= 2) {
       S.juegos[p]++;
       S.sets[p]++;
+      S.ant.push({ A: S.juegos.A, B: S.juegos.B, tb: 1 });
       msg = 'SET ' + nombrePareja(p).toUpperCase();
       dicho = 'Set ' + nombrePareja(p) + '. Sets, ' + S.sets.A + ' ' + S.sets.B;
       if (S.saque && S.tbIni) {
@@ -355,6 +366,7 @@ function accionPunto(p) {
     if (jp >= 6 && jp - jq >= 2) {
       // Gana el set
       S.sets[p]++;
+      S.ant.push({ A: S.juegos.A, B: S.juegos.B, tb: 0 });
       S.juegos = {A: 0, B: 0};
       msg = 'SET ' + nombrePareja(p).toUpperCase();
       dicho = 'Set ' + nombrePareja(p) + '. Sets, ' + S.sets.A + ' ' + S.sets.B;
@@ -463,6 +475,12 @@ function iniciarMotor() {
   setTimeout(arranque, 4000);   // sin conexión: se juega igualmente en local
 }
 
+
+
+// ===== Historial de sets terminados: 7-6 (tie-break), 6-0, ... =====
+function textoHistorial() {
+  return (S.ant || []).map(r => r.A + '-' + r.B + (r.tb ? ' TB' : ''));
+}
 
 // ===== INTERFAZ COMPARTIDA: menú de tres puntitos, nombres, saque, pantalla completa =====
 const $ = id => document.getElementById(id);
@@ -625,6 +643,11 @@ function refrescar() {
   const a = S.pts.A, b = S.pts.B;
   $('mensaje').textContent =
     S.msg || (S.tb ? 'TIE-BREAK' : ((a >= 3 && b >= 3 && a === b) ? 'IGUALES (40-40)' : ''));
+  // Historial de sets terminados
+  const ant = S.ant || [];
+  $('histTV').innerHTML = ant.length
+    ? '<small>SETS JUGADOS</small>' + ant.map(r => '<div class="set">' + r.A + '-' + r.B + (r.tb ? '<i>TIE-BREAK</i>' : '') + '</div>').join('')
+    : '';
   // Flechas de cambio de cancha en lugar del logo
   $('cambio').style.display = S.cambio ? 'block' : 'none';
   $('logo').style.visibility = S.cambio ? 'hidden' : 'visible';
