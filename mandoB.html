@@ -4,20 +4,26 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>Mando pareja B</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&display=swap" rel="stylesheet">
 <style>
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body { height: 100%; margin: 0; }
-  body { display: flex; flex-direction: column; background: #000; color: #fff; font-family: 'Arial Black', Arial, sans-serif; text-align: center; user-select: none; overflow: hidden; }
-
   :root {
+    --fondo: #020817;
+    --fondo2: #071a3d;
     --rojo: #ff2a1f;
     --amarillo: #ffd400;
     --azul: #2f6bff;
     --verde: #8dff00;
+    --ambar: #ffc400;
+    --tipo: 'Barlow Condensed', 'Roboto Condensed', 'Arial Narrow', Impact, sans-serif;
   }
+  body { display: flex; flex-direction: column; background: linear-gradient(180deg, var(--fondo2) 0%, var(--fondo) 55%); color: #fff; font-family: var(--tipo); text-align: center; user-select: none; -webkit-user-select: none; overflow: hidden; }
 
   /* ===== Pelota de saque ===== */
-  .bola { width: 1.15em; height: 1.15em; flex: none; visibility: hidden; filter: drop-shadow(0 0 6px #d4ff00); }
+  .bola { width: .95em; height: .95em; flex: none; visibility: hidden; filter: drop-shadow(0 0 6px #d4ff00); }
   .bola.on { visibility: visible; }
   .bola svg { width: 100%; height: 100%; display: block; }
 
@@ -26,68 +32,79 @@
   #botonMenu span { width: 6px; height: 6px; border-radius: 50%; background: var(--verde); display: block; }
   #fondoMenu { position: fixed; inset: 0; z-index: 21; display: none; }
   #fondoMenu.abierto { display: block; }
-  #listaMenu { position: absolute; top: 68px; right: 14px; background: #0b0b0b; border: 2px solid var(--verde); border-radius: 14px; box-shadow: 0 0 20px rgba(141,255,0,.45); overflow-y: auto; max-height: calc(100vh - 80px); min-width: 260px; max-width: calc(100vw - 28px); }
-  #listaMenu button { display: block; width: 100%; text-align: left; padding: 11px 18px; font-size: .95rem; font-family: inherit; color: #fff; background: transparent; border: none; border-bottom: 1px solid #222; cursor: pointer; letter-spacing: 1px; }
+  #listaMenu { position: absolute; top: 68px; right: 14px; background: #060d1d; border: 2px solid var(--verde); border-radius: 14px; box-shadow: 0 0 20px rgba(141,255,0,.45); overflow-y: auto; max-height: calc(100vh - 80px); min-width: 260px; max-width: calc(100vw - 28px); }
+  #listaMenu button { display: block; width: 100%; text-align: left; padding: 11px 18px; font-size: 1.1rem; font-weight: 700; font-family: inherit; color: #fff; background: transparent; border: none; border-bottom: 1px solid #1b2a4a; cursor: pointer; letter-spacing: 1.5px; }
   #listaMenu button:last-child { border-bottom: none; }
-  #listaMenu button:active { background: #1d2a00; }
+  #listaMenu button:active { background: #12304a; }
   #listaMenu .reiniciar { color: #ff6b6b; }
 
-  /* ===== Ventanas (nombres y saque) ===== */
-  .ventana { position: fixed; inset: 0; background: rgba(0,0,0,.93); display: none; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 16px; z-index: 30; overflow: auto; }
+  /* ===== Ventanas (nombres, saque y logo) ===== */
+  .ventana { position: fixed; inset: 0; background: rgba(2,8,23,.95); display: none; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 16px; z-index: 30; overflow: auto; }
   .ventana.abierto { display: flex; }
-  .ventana h2 { margin: 0 0 6px; color: var(--verde); letter-spacing: 3px; text-shadow: 0 0 10px var(--verde); font-size: 1.3rem; }
+  .ventana h2 { margin: 0 0 6px; color: var(--verde); letter-spacing: 3px; text-shadow: 0 0 10px var(--verde); font-size: 1.6rem; }
   .grupo { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: min(640px, 100%); }
-  .grupo label { font-size: .8rem; color: #aaa; display: block; text-align: left; margin-bottom: 3px; font-family: Arial, sans-serif; }
-  .grupo input { width: 100%; font-size: 1.2rem; padding: 10px; border-radius: 10px; border: 2px solid var(--verde); background: #000; color: #fff; font-family: Arial, sans-serif; }
-  .ventana .cerrar { margin-top: 8px; background: var(--verde); color: #000; font-weight: 900; font-size: 1.1rem; padding: 12px 36px; border: none; border-radius: 12px; cursor: pointer; font-family: inherit; }
-  .ventana .secundario { background: transparent; color: #aaa; border: 2px solid #444; }
+  .grupo label { font-size: .9rem; color: #9db0d0; display: block; text-align: left; margin-bottom: 3px; }
+  .grupo input { width: 100%; font-size: 1.3rem; padding: 10px; border-radius: 10px; border: 2px solid var(--verde); background: #000; color: #fff; font-family: inherit; }
+  .ventana .cerrar { margin-top: 8px; background: var(--verde); color: #000; font-weight: 800; font-size: 1.3rem; padding: 12px 36px; border: none; border-radius: 12px; cursor: pointer; font-family: inherit; }
+  .ventana .secundario { background: transparent; color: #9db0d0; border: 2px solid #34476b; }
   .elegir { display: grid; gap: 10px; width: min(640px, 100%); }
-  .elegir button { font-size: 1.2rem; padding: 16px 10px; border-radius: 12px; border: 2px solid var(--verde); background: #000; color: #fff; font-family: inherit; text-transform: uppercase; cursor: pointer; overflow: hidden; text-overflow: ellipsis; }
-  .elegir button:active { background: #1d2a00; }
+  .elegir button { font-size: 1.4rem; font-weight: 700; padding: 16px 10px; border-radius: 12px; border: 2px solid var(--verde); background: #000; color: #fff; font-family: inherit; text-transform: uppercase; cursor: pointer; overflow: hidden; text-overflow: ellipsis; }
+  .elegir button:active { background: #12304a; }
+  #vistaLogo { width: 140px; height: 140px; border-radius: 50%; object-fit: cover; box-shadow: 0 0 18px rgba(141,255,0,.6); background: #000; }
 
   /* ===== Punto de conexión (verde = sincronizado) ===== */
-  #conexion { position: fixed; top: 31px; right: 68px; z-index: 20; width: 10px; height: 10px; border-radius: 50%; background: #ff2a1f; box-shadow: 0 0 6px #ff2a1f; }
+  #conexion { position: fixed; top: 31px; right: 126px; z-index: 20; width: 10px; height: 10px; border-radius: 50%; background: #ff2a1f; box-shadow: 0 0 6px #ff2a1f; }
   #conexion.ok { background: #16a34a; box-shadow: 0 0 6px #16a34a; }
 
+  /* ===== Botón de micrófono ===== */
+  #botonMic { position: fixed; top: 14px; right: 68px; z-index: 20; width: 46px; height: 46px; border-radius: 50%; border: 2px solid #4b5b7a; background: rgba(0,0,0,.75); display: flex; align-items: center; justify-content: center; cursor: pointer; padding: 0; }
+  #botonMic svg { width: 24px; height: 24px; fill: #7f90b3; }
+  #botonMic.on { border-color: var(--rojo); box-shadow: 0 0 12px rgba(255,42,31,.8); animation: latido 1.4s ease-in-out infinite; }
+  #botonMic.on svg { fill: var(--rojo); }
+  @keyframes latido { 0%, 100% { box-shadow: 0 0 6px rgba(255,42,31,.6); } 50% { box-shadow: 0 0 18px rgba(255,42,31,1); } }
+  #avisoMic { position: fixed; top: 68px; left: 12px; right: 12px; z-index: 22; padding: 8px 12px; border-radius: 12px; background: rgba(0,0,0,.88); border: 2px solid var(--rojo); color: #fff; font-size: 1.1rem; font-weight: 700; letter-spacing: 1px; display: none; }
+  #avisoMic.on { display: block; }
 
-  .cabecera { display: flex; align-items: center; gap: 8px; padding: 8px 72px 8px 10px; background: #111; border-bottom: 3px solid #333; }
-  .logo { height: 52px; width: 52px; border-radius: 50%; object-fit: cover; flex: none; }
-
-  /* Mini tablero: sets, juegos y punto actual */
+  /* ===== Cabecera: logo + mini marcador ===== */
+  .cabecera { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; padding: 8px 128px 8px 10px; border-bottom: 3px solid var(--verde); box-shadow: 0 4px 14px rgba(141,255,0,.2); }
+  .logo { height: 54px; width: 54px; border-radius: 50%; object-fit: cover; flex: none; box-shadow: 0 0 10px rgba(141,255,0,.55); -webkit-touch-callout: none; touch-action: manipulation; }
   .tablero { border-collapse: collapse; flex: 1; min-width: 0; }
-  .tablero th { font-size: .75rem; color: #888; letter-spacing: 1px; font-weight: 400; padding: 0 4px; font-family: Arial, sans-serif; }
-  .tablero td { padding: 1px 6px; font-size: 1.8rem; line-height: 1.15; }
-  .tablero td.eq { font-size: 1.1rem; width: 1.6em; }
-  .tablero tr.fA td { color: #ff2a2a; }
-  .tablero tr.fB td { color: #2a8bff; }
-  .tablero tr.mio td { background: #1f1f1f; }
+  .tablero th { font-size: .85rem; color: var(--verde); letter-spacing: 1.5px; font-weight: 700; padding: 0 4px; }
+  .tablero td { padding: 1px 6px; font-size: 2rem; font-weight: 800; line-height: 1.1; }
+  .tablero td.eq { font-size: 1.2rem; width: 1.6em; }
+  .tablero tr.fA td { color: #ff5a50; }
+  .tablero tr.fB td { color: #5aa0ff; }
+  .tablero tr.mio td { background: rgba(141,255,0,.14); }
 
-  .hist { display: flex; flex-direction: column; gap: 2px; flex: none; text-align: center; font-size: .9rem; color: #ffd400; letter-spacing: 1px; line-height: 1.15; max-width: 26%; }
-  .hist small { font-size: .6rem; color: #888; font-weight: 400; font-family: Arial, sans-serif; }
-  .hist b { font-weight: 400; white-space: nowrap; }
+  .extra { display: none; flex: 0 0 calc(100% + 118px); margin-right: -118px; align-items: center; justify-content: center; gap: 14px; }
+  .extra.on { display: flex; }
+  .tbMando { display: none; padding: .05em .45em; border-radius: .3em; font-size: 1.5rem; font-weight: 800; letter-spacing: .06em; color: #1a1300; background: var(--ambar); box-shadow: 0 0 12px rgba(255,196,0,.8); animation: pulsoTB 1.2s ease-in-out infinite; flex: none; }
+  .tbMando.on { display: inline-block; }
+  @keyframes pulsoTB { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); } }
+  .hist { display: flex; flex-direction: row; align-items: baseline; flex-wrap: wrap; justify-content: center; gap: 4px 12px; text-align: center; font-size: 1.15rem; font-weight: 700; color: var(--amarillo); letter-spacing: 1px; line-height: 1.1; }
+  .hist small { font-size: .75rem; color: #8fa6cf; font-weight: 600; }
+  .hist b { font-weight: 700; white-space: nowrap; }
   .cambio { display: none; width: 40px; height: 40px; flex: none; filter: drop-shadow(0 0 6px var(--verde)); animation: parpadeo 1s infinite; }
   .cambio svg { width: 100%; height: 100%; display: block; }
   @keyframes parpadeo { 0%, 100% { opacity: 1; } 50% { opacity: .35; } }
 
-  .mini { display: grid; grid-template-columns: 1fr 1fr; background: #111; border-bottom: 3px solid #333; }
-  .caja { padding: 8px 4px; border-top: 4px solid transparent; min-width: 0; }
+  /* ===== Mini marcador por parejas ===== */
+  .mini { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 8px; border-bottom: 3px solid #1b2a4a; }
+  .caja { padding: 6px 4px 8px; border-radius: 14px; border: 2px solid #1b2a4a; border-top: 5px solid transparent; background: rgba(255,255,255,.04); min-width: 0; }
   .caja.A { border-top-color: #ff2a2a; }
   .caja.B { border-top-color: #2a8bff; }
-  .caja.mio { background: #1c1c1c; }
-  .caja.mio .nombres div { text-shadow: 0 0 6px var(--verde), 0 0 14px var(--verde); animation: brillo 1.6s ease-in-out infinite; }
-  @keyframes brillo { 0%, 100% { text-shadow: 0 0 4px var(--verde), 0 0 8px var(--verde); } 50% { text-shadow: 0 0 8px var(--verde), 0 0 20px var(--verde); } }
+  .caja.mio { background: rgba(141,255,0,.1); border-color: var(--verde); box-shadow: 0 0 14px rgba(141,255,0,.35); }
   .nombres { display: flex; flex-direction: column; gap: 2px; }
-  .nombres div { display: flex; align-items: center; justify-content: flex-start; gap: 6px; font-size: 1.05rem; color: #fff; white-space: nowrap; overflow: hidden; padding: 0 6px; text-transform: uppercase; letter-spacing: 1px; }
+  .nombres div { display: flex; align-items: center; justify-content: flex-start; gap: 6px; font-size: 1.3rem; font-weight: 800; color: #fff; white-space: nowrap; overflow: hidden; padding: 0 6px; text-transform: uppercase; letter-spacing: .5px; }
   .nombres div span { overflow: hidden; text-overflow: ellipsis; }
-  .puntos { font-size: 3.4rem; line-height: 1.1; margin-top: 4px; }
-  .cA { color: #ff2a2a; }
-  .cB { color: #2a8bff; }
+  .puntos { position: relative; margin: 6px auto 0; width: 82%; border-radius: 10px; color: #0a0a0a; font-size: 3.6rem; font-weight: 800; line-height: 1.12;
+    background: linear-gradient(180deg, #ffffff 0%, #ececec 49%, #bdbdbd 49.5%, #e6e6e6 51%, #f7f7f7 100%); box-shadow: 0 5px 10px rgba(0,0,0,.6); }
+  .puntos::before { content: ''; position: absolute; left: 0; right: 0; top: 49.3%; height: 3px; background: rgba(0,0,0,.5); }
+  .puntos.ad { font-size: 2.9rem; padding: .08em 0; }
 
-  /* ===== Botones 3D realistas ===== */
-  .mas, .menos { position: relative; border: none; color: #fff; font-family: inherit; line-height: 1; cursor: pointer; overflow: hidden; touch-action: manipulation; transition: transform .07s ease, box-shadow .07s ease, filter .07s ease; }
-  /* reflejo de luz curvo en la parte de arriba */
+  /* ===== Botones 3D realistas (sin cambios) ===== */
+  .mas, .menos { position: relative; border: none; color: #fff; font-family: 'Arial Black', Arial, sans-serif; line-height: 1; cursor: pointer; overflow: hidden; touch-action: manipulation; transition: transform .07s ease, box-shadow .07s ease, filter .07s ease; }
   .mas::before, .menos::before { content: ''; position: absolute; left: 4%; right: 4%; top: 2%; height: 42%; border-radius: 50% 50% 50% 50% / 100% 100% 60% 60%; background: linear-gradient(180deg, rgba(255,255,255,.55) 0%, rgba(255,255,255,.12) 70%, rgba(255,255,255,0) 100%); pointer-events: none; }
-  /* destello pequeño abajo */
   .mas::after, .menos::after { content: ''; position: absolute; left: 12%; right: 12%; bottom: 3%; height: 14%; border-radius: 50%; background: linear-gradient(0deg, rgba(255,255,255,.22), rgba(255,255,255,0)); pointer-events: none; }
 
   .mas { width: 100%; height: 100%; margin: 0; border-radius: 22px; font-size: 5.5rem;
@@ -134,35 +151,39 @@
       0 6px 9px rgba(0,0,0,.8),
       0 0 10px rgba(239,68,68,.2);
     filter: brightness(.93); }
+
   /* ===== Zona de cámara (suma el punto al acercar la pala) ===== */
-  .camara { position: relative; flex: 1; min-height: 0; margin: 12px 12px 18px; border-radius: 22px; overflow: hidden; border: 3px solid var(--verde); background: #061200; box-shadow: 0 0 18px rgba(141,255,0,.35); cursor: pointer; transition: background .15s ease, border-color .15s ease; }
+  .camara { position: relative; flex: 1; min-height: 0; margin: 12px 12px 18px; border-radius: 22px; overflow: hidden; border: 3px solid var(--verde); background: #040d1c; box-shadow: 0 0 18px rgba(141,255,0,.35); cursor: pointer; transition: background .15s ease, border-color .15s ease; }
   .camara video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: .45; }
-  .camTexto { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 12px; font-size: 1.4rem; letter-spacing: 2px; color: var(--verde); text-shadow: 0 0 10px rgba(0,0,0,.9); pointer-events: none; }
+  .camTexto { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 12px; font-size: 1.6rem; font-weight: 700; letter-spacing: 2px; color: var(--verde); text-shadow: 0 0 10px rgba(0,0,0,.9); pointer-events: none; }
   .camBarra { position: absolute; left: 12px; right: 12px; bottom: 10px; height: 8px; border-radius: 4px; background: rgba(255,255,255,.15); overflow: hidden; }
   .camBarra i { display: block; height: 100%; width: 0; background: var(--verde); }
   .camara.tapando { border-color: var(--amarillo); }
   .camara.punto { background: #22c55e; border-color: #fff; }
-  .camara.punto .camTexto { color: #000; text-shadow: none; font-size: 3rem; }
+  .camara.punto .camTexto { color: #000; text-shadow: none; font-size: 3.4rem; }
   .botones { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 0 12px 28px; height: 120px; flex: none; }
 </style>
 </head>
 <body>
 
 <div class="cabecera">
-  <img class="logo" src="logo.jpg" alt="Logo" onerror="this.style.display='none'">
+  <img class="logo" id="logo" src="logo.jpg" alt="Logo" onerror="this.style.display='none'" oncontextmenu="return false">
   <table class="tablero">
     <tr><th></th><th>SETS</th><th>JUEGOS</th><th>PUNTO</th></tr>
     <tr class="fA" id="filaA"><td class="eq">A</td><td id="tsA">0</td><td id="tjA">0</td><td id="tpA">0</td></tr>
     <tr class="fB" id="filaB"><td class="eq">B</td><td id="tsB">0</td><td id="tjB">0</td><td id="tpB">0</td></tr>
   </table>
-  <div class="hist" id="hist"></div>
-  <div class="cambio" id="cambio">
-    <svg viewBox="0 0 100 100" fill="none" stroke="#8dff00" stroke-width="9" stroke-linecap="round">
-      <path d="M 22 50 A 28 28 0 0 1 78 50"/>
-      <path d="M 78 50 A 28 28 0 0 1 22 50"/>
-      <polygon points="66,46 90,46 78,62" fill="#8dff00" stroke-width="3" stroke-linejoin="round"/>
-      <polygon points="10,54 34,54 22,38" fill="#8dff00" stroke-width="3" stroke-linejoin="round"/>
-    </svg>
+  <div class="extra" id="extra">
+  <div class="tbMando" id="tbMando">T.B.</div>
+    <div class="hist" id="hist"></div>
+    <div class="cambio" id="cambio">
+      <svg viewBox="0 0 100 100" fill="none" stroke="#8dff00" stroke-width="9" stroke-linecap="round">
+        <path d="M 22 50 A 28 28 0 0 1 78 50"/>
+        <path d="M 78 50 A 28 28 0 0 1 22 50"/>
+        <polygon points="66,46 90,46 78,62" fill="#8dff00" stroke-width="3" stroke-linejoin="round"/>
+        <polygon points="10,54 34,54 22,38" fill="#8dff00" stroke-width="3" stroke-linejoin="round"/>
+      </svg>
+    </div>
   </div>
 </div>
 
@@ -172,14 +193,14 @@
       <div id="nA0"><i class="bola"></i><span></span></div>
       <div id="nA1"><i class="bola"></i><span></span></div>
     </div>
-    <div class="puntos cA" id="puntosA">0</div>
+    <div class="puntos" id="puntosA">0</div>
   </div>
   <div id="cajaB" class="caja B">
     <div class="nombres">
       <div id="nB0"><i class="bola"></i><span></span></div>
       <div id="nB1"><i class="bola"></i><span></span></div>
     </div>
-    <div class="puntos cB" id="puntosB">0</div>
+    <div class="puntos" id="puntosB">0</div>
   </div>
 </div>
 
@@ -195,6 +216,10 @@
 </div>
 
 <div id="conexion" title="Conexión"></div>
+<button id="botonMic" onclick="alternarMic()" aria-label="Micrófono: decir punto">
+  <svg viewBox="0 0 24 24"><path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11h-2z"/></svg>
+</button>
+<div id="avisoMic"></div>
 <button id="botonMenu" onclick="abrirListaMenu()" aria-label="Menú"><span></span><span></span><span></span></button>
 
 <div id="fondoMenu" onclick="cerrarListaMenu()">
@@ -204,7 +229,9 @@
     <button id="botonCambio" onclick="alternarCambio(); cerrarListaMenu()">CAMBIO DE CANCHA: SÍ</button>
     <button id="botonVoz" onclick="alternarVoz(); cerrarListaMenu()">VOZ: SÍ</button>
     <button id="botonCamara" onclick="alternarCamara(); cerrarListaMenu()">CÁMARA: SÍ</button>
-    <button id="botonSens" onclick="alternarSens()">SENSIBILIDAD: MEDIA</button>
+    <button id="botonSens" onclick="alternarSens()">SENSIBILIDAD: ALTA</button>
+    <button id="botonMicVol" onclick="alternarMicVol()">VOLUMEN MÍNIMO VOZ: MEDIO</button>
+    <button onclick="cerrarListaMenu(); abrirLogo()">CAMBIAR LOGO</button>
     <button id="botonPantalla" onclick="pantallaCompleta(); cerrarListaMenu()">PANTALLA COMPLETA</button>
     <button onclick="deshacer(); cerrarListaMenu()">DESHACER</button>
     <button class="reiniciar" onclick="cerrarListaMenu(); reiniciar()">REINICIAR</button>
@@ -228,6 +255,17 @@
   <button class="cerrar secundario" onclick="cerrarSaque()">CANCELAR</button>
 </div>
 
+<div id="ventanaLogo" class="ventana">
+  <h2>EDITAR LOGO</h2>
+  <img id="vistaLogo" alt="Logo actual">
+  <div class="elegir">
+    <button onclick="$('archivoLogo').click()">CARGAR UNA IMAGEN NUEVA</button>
+    <button onclick="quitarLogo()">VOLVER AL LOGO ORIGINAL</button>
+  </div>
+  <input type="file" id="archivoLogo" accept="image/*" style="display:none">
+  <div id="msgLogo" style="color:#9db0d0;font-size:1.1rem;min-height:1.3em"></div>
+  <button class="cerrar secundario" onclick="cerrarLogo()">CERRAR</button>
+</div>
 
 <script>
 // ====== CONFIGURACIÓN DE ESTE MANDO ======
@@ -237,8 +275,10 @@ const VOZ_DEFECTO = false;   // en los mandos la voz empieza apagada (habla el m
 
 // ===== MOTOR COMPARTIDO: marcador y mandos usan exactamente este código =====
 // El partido vive en Firebase (/partido). Cada aparato aplica la jugada, y la envía.
+// El logo personalizado vive aparte (/logo) para no reenviarlo en cada punto.
 const DB_URL = 'https://marcadoroxa-default-rtdb.europe-west1.firebasedatabase.app';
 const RUTA = DB_URL + '/partido.json';
+const RUTA_LOGO = DB_URL + '/logo.json';
 const ESCALA = [0, 15, 30, 40];
 const NOMBRES_DEF = { A: ['Jugador 1', 'Jugador 2'], B: ['Jugador 3', 'Jugador 4'] };
 const MAX_HIST = 30;
@@ -253,9 +293,11 @@ function nombresIniciales() {
   return clonar(NOMBRES_DEF);
 }
 
+// tb = true mientras se juega el último juego a 6-6 (juego decisivo, se muestra "T.B.")
+// ini = hora (ms) en que empezó el partido, la comparten todos los aparatos
 function partidoNuevo(nombres, cc) {
   return { v: 0, pts: {A: 0, B: 0}, juegos: {A: 0, B: 0}, sets: {A: 0, B: 0},
-           saque: null, tb: false, tbIni: null, cambio: false, lados: 0, hist: [], ant: [],
+           saque: null, tb: false, cambio: false, lados: 0, hist: [], ant: [], ini: 0,
            nombres: nombres, cc: cc, msg: '', dicho: '' };
 }
 
@@ -272,9 +314,9 @@ function normalizar(d) {
   r.pts = par(d.pts); r.juegos = par(d.juegos); r.sets = par(d.sets);
   r.saque = saque(d.saque);
   r.tb = !!d.tb;
-  r.tbIni = saque(d.tbIni);
   r.cambio = !!d.cambio;
   r.lados = d.lados || 0;
+  r.ini = d.ini || 0;
   r.ant = Array.isArray(d.ant) ? d.ant : (d.ant ? Object.values(d.ant) : []);
   r.hist = Array.isArray(d.hist) ? d.hist : (d.hist ? Object.values(d.hist) : []);
   r.nombres = { A: nom(d.nombres && d.nombres.A, NOMBRES_DEF.A), B: nom(d.nombres && d.nombres.B, NOMBRES_DEF.B) };
@@ -284,10 +326,11 @@ function normalizar(d) {
   return r;
 }
 
-// ===== Voz =====
+// ===== Voz (el aparato habla) =====
 function hablar(texto) {
   if (!vozActiva || !texto || typeof speechSynthesis === 'undefined') return;
   try {
+    if (typeof alHablar === 'function') alHablar();   // el micrófono no debe oír esta voz
     speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(texto);
     u.lang = 'es-ES';
@@ -299,9 +342,9 @@ function hablar(texto) {
 function nombrePareja(p) { return S.nombres[p][0] + ' y ' + S.nombres[p][1]; }
 
 // Texto del punto de cada pareja (VENTAJA se muestra como AD donde falta espacio)
+// El juego decisivo de 6-6 se cuenta igual que cualquier otro: 15, 30, 40, iguales, ventaja.
 function textoPuntos(p) {
   const a = S.pts[p], b = S.pts[otro(p)];
-  if (S.tb) return String(a);
   if (a >= 3 && b >= 3) {
     if (a === b) return '40';
     return a > b ? 'VENTAJA' : '40';
@@ -315,7 +358,6 @@ function frasePuntos() {
   const sc = sacador();
   const p1 = sc ? sc.eq : 'A', p2 = otro(p1);
   const x = S.pts[p1], y = S.pts[p2];
-  if (S.tb) return x + ' ' + y;
   if (a >= 3 && b >= 3) {
     if (a === b) return 'Iguales';
     return 'Ventaja ' + nombrePareja(a > b ? 'A' : 'B');
@@ -328,19 +370,12 @@ function frasePuntos() {
 function sacador() {
   const s = S.saque;
   if (!s) return null;
-  if (!S.tb) return { eq: s.eq, j: s.jug[s.eq] };
-  // Tie-break: el primero saca 1 punto, luego 2 puntos cada jugador por turnos
-  const ini = S.tbIni || s;
-  const n = S.pts.A + S.pts.B;
-  const k = Math.ceil(n / 2);
-  const eq = (k % 2 === 0) ? ini.eq : otro(ini.eq);
-  const occ = (k % 2 === 0) ? k / 2 : (k - 1) / 2;
-  return { eq: eq, j: ini.jug[eq] ^ (occ % 2) };
+  return { eq: s.eq, j: s.jug[s.eq] };
 }
 
 // ===== Jugadas =====
 function instantanea() {
-  return JSON.stringify({ pts: S.pts, juegos: S.juegos, sets: S.sets, saque: S.saque, tb: S.tb, tbIni: S.tbIni, cambio: S.cambio, lados: S.lados, ant: S.ant });
+  return JSON.stringify({ pts: S.pts, juegos: S.juegos, sets: S.sets, saque: S.saque, tb: S.tb, cambio: S.cambio, lados: S.lados, ant: S.ant });
 }
 
 function terminar(msg, dicho) {
@@ -363,34 +398,15 @@ function cambiar() {
 function accionPunto(p) {
   S.hist.push(instantanea());
   if (S.hist.length > MAX_HIST) S.hist.shift();
+  if (!S.ini) S.ini = Date.now();            // por si nadie eligió quién saca: empieza con el primer punto
   const q = otro(p);
   let msg = '', dicho = '', cambio = false;
   S.cambio = false;
   S.pts[p]++;
 
-  if (S.tb) {
-    // ===== Tie-break: a 7 puntos con 2 de diferencia =====
-    if (S.pts[p] >= 7 && S.pts[p] - S.pts[q] >= 2) {
-      S.juegos[p]++;
-      S.sets[p]++;
-      S.ant.push({ A: S.juegos.A, B: S.juegos.B, tb: 1 });
-      msg = 'SET ' + nombrePareja(p).toUpperCase();
-      dicho = 'Set ' + nombrePareja(p) + '. Sets, ' + S.sets.A + ' ' + S.sets.B;
-      if (S.saque && S.tbIni) {
-        const t = otro(S.tbIni.eq);  // empieza a sacar quien recibió primero
-        S.saque = { eq: t, jug: { A: S.tbIni.jug.A ^ 1, B: S.tbIni.jug.B ^ 1 } };
-      }
-      S.juegos = {A: 0, B: 0};
-      S.pts = {A: 0, B: 0};
-      S.tb = false;
-      S.tbIni = null;
-      cambio = true;  // el set termina 7-6 = 13 juegos (impar)
-    } else {
-      dicho = S.pts.A + ' ' + S.pts.B;
-      if ((S.pts.A + S.pts.B) % 6 === 0) cambio = true;  // cada 6 puntos
-    }
-  } else if (S.pts[p] >= 4 && S.pts[p] - S.pts[q] >= 2) {
+  if (S.pts[p] >= 4 && S.pts[p] - S.pts[q] >= 2) {
     // ===== Gana el juego =====
+    const eraDecisivo = S.tb;
     S.pts = {A: 0, B: 0};
     S.juegos[p]++;
     msg = 'JUEGO ' + nombrePareja(p).toUpperCase();
@@ -404,20 +420,19 @@ function accionPunto(p) {
 
     const jp = S.juegos[p], jq = S.juegos[q];
     const total = jp + jq;
-    if (jp >= 6 && jp - jq >= 2) {
-      // Gana el set
+    if (eraDecisivo || (jp >= 6 && jp - jq >= 2)) {
+      // Gana el set (el juego decisivo de 6-6 lo cierra 7-6)
       S.sets[p]++;
-      S.ant.push({ A: S.juegos.A, B: S.juegos.B, tb: 0 });
+      S.ant.push({ A: S.juegos.A, B: S.juegos.B, tb: eraDecisivo ? 1 : 0 });
       S.juegos = {A: 0, B: 0};
+      S.tb = false;
       msg = 'SET ' + nombrePareja(p).toUpperCase();
       dicho = 'Set ' + nombrePareja(p) + '. Sets, ' + S.sets.A + ' ' + S.sets.B;
       if (total % 2 === 1) cambio = true;
     } else if (jp === 6 && jq === 6) {
-      // Empieza el tie-break
+      // Seis iguales: último juego decisivo
       S.tb = true;
-      S.pts = {A: 0, B: 0};
-      S.tbIni = S.saque ? clonar(S.saque) : null;
-      msg = 'TIE-BREAK';
+      msg = 'T.B.';
       dicho += '. Tie-break';
     } else if (total % 2 === 1) {
       cambio = true;  // juegos impares: 1, 3, 5, 7, 9, 11
@@ -437,7 +452,7 @@ function accionPunto(p) {
 function deshacer() {
   if (!S.hist.length) return;
   Object.assign(S, JSON.parse(S.hist.pop()));
-  terminar('', 'Punto anulado. ' + frasePuntos());
+  terminar('', 'Anulado. ' + frasePuntos());
 }
 
 function reiniciar() {
@@ -451,6 +466,16 @@ function reiniciar() {
   hablar(S.dicho);
   publicar();
   abrirSaque(1);
+}
+
+// ===== Cronómetro: cuenta desde que se eligió quién saca =====
+function textoCrono() {
+  if (!S.ini) return '00:00:00';
+  let s = Math.max(0, Math.floor((Date.now() - S.ini) / 1000));
+  const h = Math.floor(s / 3600); s -= h * 3600;
+  const m = Math.floor(s / 60); s -= m * 60;
+  const dos = n => (n < 10 ? '0' : '') + n;
+  return dos(h) + ':' + dos(m) + ':' + dos(s);
 }
 
 // ===== Sincronización con Firebase =====
@@ -486,6 +511,7 @@ function recibir(d) {
     const hablarlo = arrancado && r.dicho;
     S = r;
     refrescar();
+    if (typeof alRecibir === 'function') alRecibir();   // los avisos de otro aparato no cuentan como punto por voz
     if (hablarlo) hablar(r.dicho);
   } else if (r.v < S.v && !enviando) {
     publicar();  // este aparato va por delante (p. ej. jugó sin conexión)
@@ -510,17 +536,75 @@ function conectar() {
   es.onerror = () => conexion(false);
 }
 
+// ===== Logo personalizado (se cambia en un mando y se ve en los tres) =====
+let logoURL = leerLocal('logoPadel') || '';
+
+function aplicarLogo() {
+  document.querySelectorAll('img.logo').forEach(i => {
+    i.style.display = '';
+    i.src = logoURL || 'logo.jpg';
+  });
+}
+
+function recibirLogo(v) {
+  const nuevo = (typeof v === 'string' && v.indexOf('data:image') === 0) ? v : '';
+  if (nuevo === logoURL) return;
+  logoURL = nuevo;
+  guardarLocal('logoPadel', logoURL);
+  aplicarLogo();
+}
+
+function guardarLogo(dataURL) {
+  recibirLogo(dataURL);
+  fetch(RUTA_LOGO, { method: 'PUT', body: JSON.stringify(dataURL || null) })
+    .then(r => { if (!r.ok) throw new Error('http'); conexion(true); })
+    .catch(() => conexion(false));
+}
+
+// Convierte la imagen elegida en un cuadrado de 256 px (ligero y válido para el círculo del logo)
+function procesarLogo(archivo, alTerminar) {
+  if (!archivo) return;
+  const url = URL.createObjectURL(archivo);
+  const img = new Image();
+  img.onload = () => {
+    const T = 256, c = document.createElement('canvas');
+    c.width = c.height = T;
+    const g = c.getContext('2d');
+    g.fillStyle = '#020817';
+    g.fillRect(0, 0, T, T);
+    const lado = Math.min(img.width, img.height);
+    g.drawImage(img, (img.width - lado) / 2, (img.height - lado) / 2, lado, lado, 0, 0, T, T);
+    URL.revokeObjectURL(url);
+    guardarLogo(c.toDataURL('image/jpeg', 0.85));
+    if (alTerminar) alTerminar(true);
+  };
+  img.onerror = () => { URL.revokeObjectURL(url); if (alTerminar) alTerminar(false); };
+  img.src = url;
+}
+
+function conectarLogo() {
+  aplicarLogo();
+  fetch(RUTA_LOGO).then(r => r.json()).then(recibirLogo).catch(() => {});
+  let es;
+  try { es = new EventSource(RUTA_LOGO); } catch (e) { return; }
+  es.addEventListener('put', ev => {
+    let m;
+    try { m = JSON.parse(ev.data); } catch (e) { return; }
+    if (m.path === '/') recibirLogo(m.data);
+  });
+}
+
 function iniciarMotor() {
   refrescar();
   conectar();
+  conectarLogo();
+  setInterval(() => { if (typeof alTick === 'function') alTick(); }, 500);
   setTimeout(arranque, 4000);   // sin conexión: se juega igualmente en local
 }
 
-
-
-// ===== Historial de sets terminados: 7-6 (tie-break), 6-0, ... =====
+// ===== Historial de sets terminados: 7-6 T.B., 6-0, ... =====
 function textoHistorial() {
-  return (S.ant || []).map(r => r.A + '-' + r.B + (r.tb ? ' TB' : ''));
+  return (S.ant || []).map(r => r.A + '-' + r.B + (r.tb ? ' T.B.' : ''));
 }
 
 // ===== INTERFAZ COMPARTIDA: menú de tres puntitos, nombres, saque, pantalla completa =====
@@ -538,10 +622,9 @@ function cerrarListaMenu() { $('fondoMenu').classList.remove('abierto'); }
 function pintarMenu() {
   $('botonCambio').textContent = 'CAMBIO DE CANCHA: ' + (S.cc ? 'SÍ' : 'NO');
   $('botonVoz').textContent = 'VOZ: ' + (vozActiva ? 'SÍ' : 'NO');
-  $('botonCamara').textContent = 'CÁMARA: ' + (camActiva ? 'SÍ' : 'NO');
-  $('botonSens').textContent = 'SENSIBILIDAD: ' + sens.toUpperCase();
   const activa = document.fullscreenElement || document.webkitFullscreenElement;
   $('botonPantalla').textContent = activa ? 'SALIR DE PANTALLA COMPLETA' : 'PANTALLA COMPLETA';
+  if (typeof pintarMenuExtra === 'function') pintarMenuExtra();
 }
 
 // ----- Nombres y pelota de saque -----
@@ -616,7 +699,7 @@ function elegirSaque(paso, p, j) {
   } else {
     saqueTmp.jug[p] = j;
     S.saque = saqueTmp;
-    if (S.tb) S.tbIni = clonar(saqueTmp);
+    if (!S.ini) S.ini = Date.now();     // aquí empieza el partido y el cronómetro
     saqueTmp = null;
     cerrarSaque();
     cambiar();
@@ -681,7 +764,7 @@ function pintarHistorial() {
   const el = $('hist');
   if (!h.length) { el.innerHTML = ''; el.style.display = 'none'; return; }
   el.style.display = 'flex';
-  el.innerHTML = '<small>SETS</small>' + h.map(x => '<b>' + x + '</b>').join('') + (S.tb ? '<small style="color:#ffd400">TIE-BREAK</small>' : '');
+  el.innerHTML = '<small>SETS</small>' + h.map(x => '<b>' + x + '</b>').join('');
 }
 
 function refrescar() {
@@ -689,35 +772,100 @@ function refrescar() {
     const t = textoPuntos(p);
     const corto = t === 'VENTAJA' ? 'AD' : t;
     $('puntos' + p).textContent = corto;
+    $('puntos' + p).classList.toggle('ad', t === 'VENTAJA');
     $('tp' + p).textContent = corto;
     $('tj' + p).textContent = S.juegos[p];
     $('ts' + p).textContent = S.sets[p];
   });
+  $('tbMando').classList.toggle('on', !!S.tb);
   pintarNombres();
   pintarBola();
   marcarMia();
   pintarHistorial();
   $('cambio').style.display = S.cambio ? 'block' : 'none';
+  $('extra').classList.toggle('on', !!(S.tb || S.cambio || (S.ant && S.ant.length)));
   pintarMenu();
 }
 
+function pintarMenuExtra() {
+  $('botonCamara').textContent = 'CÁMARA: ' + (camActiva ? 'SÍ' : 'NO');
+  $('botonSens').textContent = 'SENSIBILIDAD: ' + sens.toUpperCase();
+  $('botonMicVol').textContent = 'VOLUMEN MÍNIMO VOZ: ' + micVol.toUpperCase();
+}
 
-// ===== CÁMARA: al acercar la pala al objetivo se suma el punto =====
-// Se compara cada píxel con cómo se veía antes. Si casi toda la imagen se oscurece
-// de golpe (la pala tapa el objetivo; los agujeros dejan pasar algo de luz) y
-// se mantiene CAM_TAPADO_MS, cuenta un punto. Después hay un bloqueo de CAM_BLOQUEO_MS.
+// ===== Logo: mantener pulsado 2 segundos para editarlo =====
+function abrirLogo() {
+  $('vistaLogo').src = logoURL || 'logo.jpg';
+  $('msgLogo').textContent = '';
+  $('ventanaLogo').classList.add('abierto');
+}
+function cerrarLogo() { $('ventanaLogo').classList.remove('abierto'); }
+function quitarLogo() { guardarLogo(''); $('vistaLogo').src = 'logo.jpg'; $('msgLogo').textContent = 'Logo original restaurado en los tres aparatos'; }
+$('archivoLogo').addEventListener('change', e => {
+  const f = e.target.files && e.target.files[0];
+  e.target.value = '';
+  if (!f) return;
+  $('msgLogo').textContent = 'Cargando...';
+  procesarLogo(f, ok => {
+    $('msgLogo').textContent = ok ? 'Logo cambiado en mando A, mando B y marcador' : 'No se pudo leer esa imagen';
+    if (ok) $('vistaLogo').src = logoURL;
+  });
+});
+(function () {
+  let t = null;
+  const logo = $('logo');
+  const parar = () => { clearTimeout(t); t = null; };
+  logo.addEventListener('pointerdown', () => { parar(); t = setTimeout(() => { t = null; if (navigator.vibrate) navigator.vibrate(80); abrirLogo(); }, 2000); });
+  ['pointerup', 'pointercancel', 'pointerleave', 'pointermove'].forEach(ev => logo.addEventListener(ev, e => { if (ev !== 'pointermove' || Math.abs(e.movementX) + Math.abs(e.movementY) > 6) parar(); }));
+})();
+
+// ===== CÁMARA: al acercar la pala (o cualquier superficie) al objetivo se suma el punto =====
+// Se compara cada píxel con cómo se veía antes. Si media pantalla o más cambia de luz de golpe
+// (más oscura o más clara, según la pala y el fondo) y se mantiene CAM_TAPADO_MS, cuenta un punto.
+// Después hay un descanso (bloqueo compartido con la voz) para no sumar dos veces.
+// ==CAM_CORE==
 const CAM_W = 32, CAM_H = 24;
-const CAM_TAPADO_MS = 300;      // tiempo que debe estar tapada la cámara
-const CAM_BLOQUEO_MS = 2000;    // descanso después de cada punto
-const CAM_RELEARN_MS = 4000;    // si queda tapada mucho rato, se vuelve a aprender la luz
-// caida: un píxel cuenta como tapado si baja de esa fracción de su luz normal
-// cuanto: fracción de píxeles tapados necesaria
-const SENSIBILIDADES = { alta: { caida: 0.65, cuanto: 0.60 }, media: { caida: 0.50, cuanto: 0.70 }, baja: { caida: 0.35, cuanto: 0.80 } };
+const CAM_TAPADO_MS = 200;      // tiempo que debe durar el cambio
+const CAM_RELEARN_MS = 4000;    // si el cambio dura mucho, se vuelve a aprender la luz normal
+// cambio: un píxel cuenta como cambiado si su luz sube o baja más de esa fracción (y al menos 12 niveles)
+// cuanto: fracción de píxeles cambiados necesaria
+const SENSIBILIDADES = {
+  alta:  { cambio: 0.30, cuanto: 0.50 },
+  media: { cambio: 0.40, cuanto: 0.60 },
+  baja:  { cambio: 0.50, cuanto: 0.75 }
+};
+
+function nuevoCam() { return { base: null, desde: 0, armado: true }; }
+
+// Procesa un fotograma. lum = luz de cada píxel (+1). Devuelve { frac, cubierto, disparo }
+function pasoCam(C, lum, ahora, cfg) {
+  const n = lum.length;
+  if (!C.base) { C.base = Float32Array.from(lum); return { frac: 0, cubierto: false, disparo: false }; }
+  let cambiados = 0;
+  for (let i = 0; i < n; i++) {
+    const dif = Math.abs(lum[i] - C.base[i]);
+    if (dif > Math.max(cfg.cambio * C.base[i], 12)) cambiados++;
+  }
+  const frac = cambiados / n;
+  const cubierto = frac >= cfg.cuanto;
+  let disparo = false;
+  if (!cubierto) {
+    for (let i = 0; i < n; i++) C.base[i] += (lum[i] - C.base[i]) * 0.05;   // sigue los cambios lentos de luz
+    C.desde = 0;
+    C.armado = true;
+  } else {
+    if (!C.desde) C.desde = ahora;
+    if (C.armado && ahora - C.desde >= CAM_TAPADO_MS) { C.armado = false; disparo = true; }
+    else if (ahora - C.desde > CAM_RELEARN_MS) { C.base = Float32Array.from(lum); C.desde = 0; C.armado = true; }
+  }
+  return { frac, cubierto, disparo };
+}
+// ==/CAM_CORE==
 
 let camActiva = leerLocal('camPadel') !== 'no';
-let sens = SENSIBILIDADES[leerLocal('sensPadel')] ? leerLocal('sensPadel') : 'media';
-let camStream = null, camTimer = null, camBase = null, camLum = null;
-let camDesde = 0, camArmado = true, camBloqueoHasta = 0, camFlash = null;
+let sens = SENSIBILIDADES[leerLocal('sensPadel')] ? leerLocal('sensPadel') : 'alta';
+let camStream = null, camTimer = null, camLum = null, camFlash = null;
+let CAM = nuevoCam();
 const camCanvas = document.createElement('canvas');
 camCanvas.width = CAM_W; camCanvas.height = CAM_H;
 const camCtx = camCanvas.getContext('2d', { willReadFrequently: true });
@@ -736,7 +884,7 @@ async function iniciarCamara() {
     const v = $('video');
     v.srcObject = camStream;
     await v.play();
-    camBase = null; camDesde = 0; camArmado = true;
+    CAM = nuevoCam();
     camTimer = setInterval(analizarCamara, 50);
     textoCam('ACERCA LA PALA');
   } catch (e) {
@@ -749,7 +897,7 @@ function pararCamara() {
   if (camTimer) { clearInterval(camTimer); camTimer = null; }
   if (camStream) { camStream.getTracks().forEach(t => t.stop()); camStream = null; }
   $('video').srcObject = null;
-  camBase = null;
+  CAM = nuevoCam();
   $('camara').classList.remove('tapando');
   $('camNivel').style.width = '0';
 }
@@ -762,43 +910,10 @@ function analizarCamara() {
   const n = CAM_W * CAM_H;
   if (!camLum) camLum = new Float32Array(n);
   for (let i = 0; i < n; i++) camLum[i] = 0.299 * d[i*4] + 0.587 * d[i*4+1] + 0.114 * d[i*4+2] + 1;
-  if (!camBase) { camBase = Float32Array.from(camLum); return; }
-
-  const cfg = SENSIBILIDADES[sens];
-  let tapados = 0;
-  for (let i = 0; i < n; i++) if (camLum[i] < camBase[i] * cfg.caida) tapados++;
-  const frac = tapados / n;
-  const ahora = performance.now();
-  const cubierto = frac >= cfg.cuanto;
-  $('camNivel').style.width = Math.min(100, Math.round(frac * 100)) + '%';
-  $('camara').classList.toggle('tapando', cubierto);
-
-  if (!cubierto) {
-    for (let i = 0; i < n; i++) camBase[i] += (camLum[i] - camBase[i]) * 0.05;  // sigue los cambios lentos de luz
-    camDesde = 0;
-    if (!camArmado && ahora > camBloqueoHasta) { camArmado = true; textoCam('ACERCA LA PALA'); }
-  } else {
-    if (!camDesde) camDesde = ahora;
-    if (camArmado && ahora - camDesde >= CAM_TAPADO_MS) {
-      camArmado = false;
-      camBloqueoHasta = ahora + CAM_BLOQUEO_MS;
-      puntoCamara();
-    } else if (ahora - camDesde > CAM_RELEARN_MS) {
-      camBase = Float32Array.from(camLum); camDesde = 0;   // cambio de luz permanente: reaprender
-    }
-  }
-}
-
-function puntoCamara() {
-  // No sumar si hay una ventana o el menú abiertos
-  if (document.querySelector('.ventana.abierto') || $('fondoMenu').classList.contains('abierto')) return;
-  if (navigator.vibrate) navigator.vibrate(60);
-  accionPunto(parejaActual());
-  const c = $('camara');
-  c.classList.add('punto');
-  textoCam('¡PUNTO!');
-  clearTimeout(camFlash);
-  camFlash = setTimeout(() => { c.classList.remove('punto'); textoCam('ESPERA...'); }, 500);
+  const r = pasoCam(CAM, camLum, performance.now(), SENSIBILIDADES[sens]);
+  $('camNivel').style.width = Math.min(100, Math.round(r.frac * 100)) + '%';
+  $('camara').classList.toggle('tapando', r.cubierto);
+  if (r.disparo) puntoAuto('cámara');
 }
 
 function alternarCamara() {
@@ -828,6 +943,160 @@ document.addEventListener('visibilitychange', () => {
 });
 
 if (camActiva) iniciarCamara(); else textoCam('CÁMARA APAGADA · TOCA PARA ACTIVAR');
+
+
+// ===== PUNTO AUTOMÁTICO: bloqueo común (cámara + voz) para no sumar dos veces =====
+const AUTO_BLOQUEO_MS = 2000;
+let autoBloqueoHasta = 0;
+
+function puntoAuto(origen) {
+  const ahora = performance.now();
+  if (ahora < autoBloqueoHasta) return false;
+  // No sumar si hay una ventana o el menú abiertos
+  if (document.querySelector('.ventana.abierto') || $('fondoMenu').classList.contains('abierto')) return false;
+  autoBloqueoHasta = ahora + AUTO_BLOQUEO_MS;
+  if (navigator.vibrate) navigator.vibrate(60);
+  accionPunto(parejaActual());
+  const c = $('camara');
+  c.classList.add('punto');
+  textoCam('¡PUNTO!');
+  clearTimeout(camFlash);
+  camFlash = setTimeout(() => { c.classList.remove('punto'); textoCam(camStream ? 'ACERCA LA PALA' : 'CÁMARA APAGADA · TOCA PARA ACTIVAR'); }, 600);
+  return true;
+}
+
+// La voz del propio aparato y los avisos que llegan de otro aparato ("anulado", "juego"...) no cuentan
+function alHablar() { autoBloqueoHasta = Math.max(autoBloqueoHasta, performance.now() + 3500); }
+function alRecibir() { autoBloqueoHasta = Math.max(autoBloqueoHasta, performance.now() + 2500); }
+
+// ===== MICRÓFONO: al oír "punto" suma un punto (solo si se oye fuerte y cerca) =====
+// El reconocimiento de voz del navegador (Chrome) entiende la palabra; un medidor de volumen aparte
+// descarta lo que suena flojo (el equipo de enfrente, a más de ~3 m). El volumen mínimo se ajusta en el menú.
+const MIC_UMBRALES = { bajo: 0.012, medio: 0.03, alto: 0.07 };   // volumen (RMS) mínimo
+const MIC_VENTANA_MS = 1800;                                     // se mira el volumen de justo antes de oír la palabra
+let micActivo = false, micVol = MIC_UMBRALES[leerLocal('micVolPadel')] ? leerLocal('micVolPadel') : 'medio';
+let micRec = null, micStream = null, micAudioCtx = null, micAnalizador = null, micTimer = null;
+let micHistorial = [], micVisto = 0, micSesion = 0, micContadas = {}, micTextoAviso = null;
+
+function avisoMic(t, ms) {
+  const a = $('avisoMic');
+  a.textContent = t; a.classList.add('on');
+  clearTimeout(micTextoAviso);
+  micTextoAviso = setTimeout(() => a.classList.remove('on'), ms || 2200);
+}
+
+function pintarMic() {
+  $('botonMic').classList.toggle('on', micActivo);
+  $('botonMic').setAttribute('aria-pressed', micActivo ? 'true' : 'false');
+}
+
+function volumenReciente() {
+  const ahora = performance.now();
+  micHistorial = micHistorial.filter(m => ahora - m.t <= MIC_VENTANA_MS);
+  return micHistorial.reduce((mx, m) => Math.max(mx, m.v), 0);
+}
+
+function medirVolumen() {
+  if (!micAnalizador) return;
+  const buf = new Float32Array(micAnalizador.fftSize);
+  micAnalizador.getFloatTimeDomainData(buf);
+  let s = 0;
+  for (let i = 0; i < buf.length; i++) s += buf[i] * buf[i];
+  const v = Math.sqrt(s / buf.length);
+  micHistorial.push({ t: performance.now(), v });
+  if (v > micVisto) micVisto = v;
+}
+
+async function iniciarMedidor() {
+  try {
+    micStream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false }, video: false });
+    const AC = window.AudioContext || window.webkitAudioContext;
+    micAudioCtx = new AC();
+    const fuente = micAudioCtx.createMediaStreamSource(micStream);
+    micAnalizador = micAudioCtx.createAnalyser();
+    micAnalizador.fftSize = 1024;
+    fuente.connect(micAnalizador);
+    micTimer = setInterval(medirVolumen, 60);
+  } catch (e) { micAnalizador = null; }   // sin medidor: se acepta la palabra sin filtrar por volumen
+}
+
+function pararMedidor() {
+  clearInterval(micTimer); micTimer = null;
+  if (micStream) { micStream.getTracks().forEach(t => t.stop()); micStream = null; }
+  if (micAudioCtx) { try { micAudioCtx.close(); } catch (e) {} micAudioCtx = null; }
+  micAnalizador = null; micHistorial = []; micVisto = 0;
+}
+
+function oirPunto(clave) {
+  if (micContadas[clave]) return;           // una frase cuenta una sola vez aunque llegue en trozos
+  micContadas[clave] = true;
+  // Filtro de volumen (solo si el medidor está recibiendo sonido de verdad)
+  if (micAnalizador && micVisto > 0) {
+    if (volumenReciente() < MIC_UMBRALES[micVol]) { avisoMic('"PUNTO" MUY FLOJO · IGNORADO'); return; }
+  }
+  puntoAuto('voz');
+}
+
+function arrancarReconocimiento() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { avisoMic('ESTE NAVEGADOR NO ENTIENDE VOZ · USA CHROME', 4000); micActivo = false; guardarLocal('micPadel', 'no'); pintarMic(); return false; }
+  const sesion = ++micSesion;
+  micContadas = {};
+  micRec = new SR();
+  micRec.lang = 'es-ES';
+  micRec.continuous = true;
+  micRec.interimResults = true;
+  micRec.maxAlternatives = 1;
+  micRec.onresult = ev => {
+    for (let i = ev.resultIndex; i < ev.results.length; i++) {
+      const texto = (ev.results[i][0].transcript || '').toLowerCase();
+      if (/\bpunto\b/.test(texto) && !/anulad/.test(texto)) oirPunto(sesion + ':' + i);
+    }
+  };
+  micRec.onerror = ev => {
+    if (ev.error === 'not-allowed' || ev.error === 'service-not-allowed') {
+      avisoMic('SIN PERMISO DE MICRÓFONO', 3500);
+      micActivo = false; guardarLocal('micPadel', 'no'); pararMedidor(); pintarMic();
+    }
+  };
+  micRec.onend = () => {                     // Chrome corta el reconocimiento tras un silencio: se reanuda solo
+    if (micActivo && sesion === micSesion) setTimeout(() => { if (micActivo) arrancarReconocimiento(); }, 250);
+  };
+  try { micRec.start(); } catch (e) {}
+  return true;
+}
+
+async function activarMic() {
+  micActivo = true;
+  guardarLocal('micPadel', 'si');
+  pintarMic();
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { avisoMic('EL MICRÓFONO NECESITA HTTPS', 3500); micActivo = false; pintarMic(); return; }
+  if (!arrancarReconocimiento()) return;
+  iniciarMedidor();
+  avisoMic('MICRÓFONO ACTIVO · DI "PUNTO"');
+}
+
+function desactivarMic() {
+  micActivo = false;
+  guardarLocal('micPadel', 'no');
+  micSesion++;
+  if (micRec) { try { micRec.onend = null; micRec.abort(); } catch (e) {} micRec = null; }
+  pararMedidor();
+  pintarMic();
+  avisoMic('MICRÓFONO APAGADO');
+}
+
+function alternarMic() { micActivo ? desactivarMic() : activarMic(); }
+
+function alternarMicVol() {
+  const orden = ['bajo', 'medio', 'alto'];
+  micVol = orden[(orden.indexOf(micVol) + 1) % orden.length];
+  guardarLocal('micVolPadel', micVol);
+  pintarMenu();
+}
+
+// El micrófono empieza apagado: el navegador exige un toque del usuario para dar permiso
+pintarMic();
 
 
 $('mas').addEventListener('click', () => {
