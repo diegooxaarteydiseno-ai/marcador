@@ -68,6 +68,8 @@
   .cab { display: flex; align-items: center; gap: 12px; flex: none; padding: 10px 124px 8px 14px; min-height: 70px; }
   .logo { height: 52px; width: 52px; border-radius: 50%; object-fit: cover; flex: none; border: 2px solid var(--verde); box-shadow: 0 0 12px rgba(141,255,0,.55); -webkit-touch-callout: none; touch-action: manipulation; }
   .cab-info { flex: 1; min-width: 0; display: flex; align-items: center; justify-content: flex-start; gap: 10px; flex-wrap: wrap; }
+  .chipPista { font-size: 1.05rem; font-weight: 800; letter-spacing: .14em; color: #06210f; background: var(--verde); border-radius: .4em; padding: 0 .55em; line-height: 1.5; }
+  .chipPista:empty { display: none; }
   .subtitulo { font-size: 1.15rem; font-weight: 700; letter-spacing: .09em; color: var(--verde); text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
   .tbMando { display: none; padding: .02em .5em; border-radius: .3em; font-size: 1.5rem; font-weight: 800; letter-spacing: .06em; color: #1a1300; background: var(--ambar); box-shadow: 0 0 12px rgba(255,196,0,.8); animation: pulsoTB 1.2s ease-in-out infinite; }
   .tbMando.on { display: inline-block; }
@@ -111,26 +113,29 @@
   .pie small { font-size: .85rem; font-weight: 700; letter-spacing: .2em; color: var(--verde); }
   .pie b { font-size: 1.7rem; font-weight: 800; letter-spacing: .06em; font-variant-numeric: tabular-nums; text-shadow: 0 0 8px rgba(255,255,255,.35); }
 
-  /* ===== Cámara: franja discreta (sigue captando, no enseña la imagen) ===== */
-  .camara { position: relative; flex: none; height: 50px; margin: 10px 12px 0; border-radius: 14px; overflow: hidden; border: 2px solid #2a4a2a; background: rgba(2,8,23,.7); display: flex; align-items: center; padding: 0 14px; cursor: pointer; transition: background .15s ease, border-color .15s ease; }
-  .camara video { position: absolute; left: 0; top: 0; width: 2px; height: 2px; opacity: 0; pointer-events: none; }
-  .camTexto { display: flex; align-items: center; gap: 10px; font-size: 1.05rem; font-weight: 700; letter-spacing: .14em; color: #9db0d0; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .camTexto::before { content: ''; width: 12px; height: 12px; border-radius: 50%; flex: none; background: var(--verde); box-shadow: 0 0 8px var(--verde); }
-  .camBarra { position: absolute; left: 0; right: 0; bottom: 0; height: 4px; background: rgba(255,255,255,.1); }
+  /* ===== Cámara: vista previa pequeña para apuntar la pala, con luz de estado ===== */
+  .camara { position: relative; flex: 1 1 auto; min-height: 120px; max-height: 300px; margin: 10px 12px 0; border-radius: 16px; overflow: hidden; border: 2px solid #2a4a2a; background: #040d1c; display: flex; align-items: flex-end; cursor: pointer; transition: background .15s ease, border-color .15s ease; }
+  .camara video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); opacity: .9; }
+  .camTexto { position: relative; z-index: 1; display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px 14px 12px; font-size: 1.05rem; font-weight: 700; letter-spacing: .14em; color: #fff; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; background: linear-gradient(0deg, rgba(2,8,23,.85), rgba(2,8,23,0)); text-shadow: 0 1px 4px #000; }
+  .camTexto::before { content: ''; width: 14px; height: 14px; border-radius: 50%; flex: none; background: var(--verde); box-shadow: 0 0 10px var(--verde); }
+  .camBarra { position: absolute; left: 0; right: 0; bottom: 0; height: 5px; background: rgba(255,255,255,.12); z-index: 2; }
   .camBarra i { display: block; height: 100%; width: 0; background: var(--verde); }
   .camara.tapando { border-color: var(--ambar); }
-  .camara.tapando .camTexto::before { background: var(--ambar); box-shadow: 0 0 10px var(--ambar); }
+  .camara.tapando .camTexto::before { background: var(--ambar); box-shadow: 0 0 12px var(--ambar); }
+  .camara.ignorado { border-color: #6b7a99; }
+  .camara.ignorado .camTexto::before { background: #6b7a99; box-shadow: none; }
   .camara.punto { background: var(--lima); border-color: #fff; }
-  .camara.punto .camTexto { color: #06210f; }
-  .camara.punto .camTexto::before { background: #06210f; box-shadow: none; }
+  .camara.punto video { opacity: .15; }
+  .camara.punto .camTexto { color: #06210f; background: none; text-shadow: none; font-size: 2rem; justify-content: center; padding-bottom: 40px; }
+  .camara.punto .camTexto::before { display: none; }
 
   /* ===== Botones 3D: más en verde limón, menos en azul oscuro con borde blanco ===== */
-  .botones { flex: 1; min-height: 110px; display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 14px 12px 26px; }
+  .botones { flex: 0 0 auto; height: clamp(84px, 15vh, 130px); display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 14px 12px 22px; }
   .mas, .menos { position: relative; border: none; font-family: 'Arial Black', Arial, sans-serif; line-height: 1; cursor: pointer; overflow: hidden; touch-action: manipulation; width: 100%; height: 100%; margin: 0; border-radius: 22px; transition: transform .07s ease, box-shadow .07s ease, filter .07s ease; }
   .mas::before, .menos::before { content: ''; position: absolute; left: 4%; right: 4%; top: 2%; height: 42%; border-radius: 50% 50% 50% 50% / 100% 100% 60% 60%; background: linear-gradient(180deg, rgba(255,255,255,.55) 0%, rgba(255,255,255,.12) 70%, rgba(255,255,255,0) 100%); pointer-events: none; }
   .mas::after, .menos::after { content: ''; position: absolute; left: 12%; right: 12%; bottom: 3%; height: 14%; border-radius: 50%; background: linear-gradient(0deg, rgba(255,255,255,.22), rgba(255,255,255,0)); pointer-events: none; }
 
-  .mas { font-size: 5.5rem; color: #06210f;
+  .mas { font-size: 4rem; color: #06210f;
     background: radial-gradient(120% 90% at 50% 0%, #f1ff9a 0%, #c8ff1a 30%, #8fd400 68%, #4d7d00 100%);
     text-shadow: 0 2px 0 rgba(255,255,255,.45), 0 0 14px rgba(230,255,140,.45);
     box-shadow:
@@ -152,7 +157,7 @@
       0 8px 12px rgba(0,0,0,.8),
       0 0 14px rgba(184,255,0,.25);
     filter: brightness(.94); }
-  .menos { font-size: 4.5rem; color: #fff; border: 3px solid #fff;
+  .menos { font-size: 3.4rem; color: #fff; border: 3px solid #fff;
     background: radial-gradient(120% 110% at 50% 0%, #3b66c4 0%, #1d3f85 32%, #0f2859 70%, #071634 100%);
     text-shadow: 0 -2px 0 rgba(255,255,255,.2), 0 4px 6px rgba(0,0,0,.55), 0 0 12px rgba(160,200,255,.35);
     box-shadow:
@@ -181,6 +186,7 @@
 <div class="cab">
   <img class="logo" id="logo" src="logo.jpg" alt="Logo" onerror="this.style.display='none'" oncontextmenu="return false">
   <div class="cab-info">
+    <span class="chipPista" id="chipPista"></span>
     <div class="subtitulo" id="subtitulo">&nbsp;</div>
     <span class="tbMando" id="tbMando">T.B.</span>
     <span class="cambio" id="cambio">
@@ -240,6 +246,7 @@
     <button onclick="cerrarListaMenu(); abrirSaque(1)">QUIÉN SACA</button>
     <button id="botonCambio" onclick="alternarCambio(); cerrarListaMenu()">CAMBIO DE CANCHA: SÍ</button>
     <button id="botonVoz" onclick="alternarVoz(); cerrarListaMenu()">VOZ: SÍ</button>
+    <button id="botonPista" onclick="cerrarListaMenu(); abrirPista()">PISTA · CAMBIAR</button>
     <button id="botonCamara" onclick="alternarCamara(); cerrarListaMenu()">CÁMARA: SÍ</button>
     <button id="botonSens" onclick="alternarSens()">SENSIBILIDAD: ALTA</button>
     <button onclick="cerrarListaMenu(); abrirLogo()">CAMBIAR LOGO</button>
@@ -258,6 +265,12 @@
     <div><label>Pareja B · jugador 2</label><input id="iB2" maxlength="14"></div>
   </div>
   <button class="cerrar" onclick="guardarNombres()">GUARDAR</button>
+</div>
+
+<div id="ventanaPista" class="ventana">
+  <h2>ELEGIR PISTA</h2>
+  <div class="elegir" id="opcionesPista"></div>
+  <button class="cerrar secundario" id="cancelarPista" onclick="cerrarPista()">CANCELAR</button>
 </div>
 
 <div id="ventanaSaque" class="ventana">
@@ -287,17 +300,21 @@ const VOZ_DEFECTO = false;   // en los mandos la voz empieza apagada (habla el m
 // ===== MOTOR COMPARTIDO: marcador y mandos usan exactamente este código =====
 // El partido vive en Firebase (/partido). Cada aparato aplica la jugada, y la envía.
 // El logo personalizado vive aparte (/logo) para no reenviarlo en cada punto.
-const DB_URL = 'https://marcadoroxa-default-rtdb.europe-west1.firebasedatabase.app';
-const RUTA = DB_URL + '/partido.json';
-const RUTA_LOGO = DB_URL + '/logo.json';
-const ESCALA = [0, 15, 30, 40];
-const NOMBRES_DEF = { A: ['Jugador 1', 'Jugador 2'], B: ['Jugador 3', 'Jugador 4'] };
-const MAX_HIST = 30;
-
 function leerLocal(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
 function guardarLocal(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
 function clonar(x) { return x == null ? x : JSON.parse(JSON.stringify(x)); }
 function otro(p) { return p === 'A' ? 'B' : 'A'; }
+const DB_URL = 'https://marcadoroxa-default-rtdb.europe-west1.firebasedatabase.app';
+const RUTA_LOGO = DB_URL + '/logo.json';            // el logo es común a todas las pistas
+const PISTAS = 5;                                    // cada pista tiene su propio partido: /pistas/N/partido
+function rutaDe(n) { return DB_URL + '/pistas/' + n + '/partido.json'; }
+let PISTA = parseInt(leerLocal('pistaPadel'), 10) || 0;
+if (PISTA < 1 || PISTA > PISTAS) PISTA = 0;
+let RUTA = PISTA ? rutaDe(PISTA) : '';
+const ESCALA = [0, 15, 30, 40];
+const NOMBRES_DEF = { A: ['Jugador 1', 'Jugador 2'], B: ['Jugador 3', 'Jugador 4'] };
+const MAX_HIST = 30;
+
 
 function nombresIniciales() {
   try { const g = JSON.parse(leerLocal('nombresPadel')); if (g && g.A && g.B) return g; } catch (e) {}
@@ -500,6 +517,7 @@ function publicar() {
 }
 
 function enviar() {
+  if (!RUTA) return;
   enviando = true;
   pendiente = false;
   fetch(RUTA, { method: 'PUT', body: JSON.stringify(S) })
@@ -510,7 +528,7 @@ function enviar() {
 
 // Al abrir: si el partido no tiene saque elegido, se pregunta quién saca
 function arranque() {
-  if (arrancado) return;
+  if (arrancado || !PISTA) return;
   arrancado = true;
   if (!S.saque) abrirSaque(1);
 }
@@ -531,12 +549,17 @@ function recibir(d) {
 }
 
 function descargar() {
-  fetch(RUTA).then(r => r.json()).then(recibir).catch(() => conexion(false));
+  if (!RUTA) return;
+  const ruta = RUTA;
+  fetch(ruta).then(r => r.json()).then(d => { if (ruta === RUTA) recibir(d); }).catch(() => conexion(false));
 }
 
+let esPartido = null;
 function conectar() {
+  if (!RUTA) return;
   let es;
   try { es = new EventSource(RUTA); } catch (e) { return; }
+  esPartido = es;
   es.addEventListener('put', ev => {
     conexion(true);
     let m;
@@ -607,7 +630,7 @@ function conectarLogo() {
 
 function iniciarMotor() {
   refrescar();
-  conectar();
+  if (PISTA) conectar(); else abrirPista();
   conectarLogo();
   setInterval(() => { if (typeof alTick === 'function') alTick(); }, 500);
   setTimeout(arranque, 4000);   // sin conexión: se juega igualmente en local
@@ -635,6 +658,9 @@ function pintarMenu() {
   $('botonVoz').textContent = 'VOZ: ' + (vozActiva ? 'SÍ' : 'NO');
   const activa = document.fullscreenElement || document.webkitFullscreenElement;
   $('botonPantalla').textContent = activa ? 'SALIR DE PANTALLA COMPLETA' : 'PANTALLA COMPLETA';
+  if ($('botonPista')) $('botonPista').textContent = 'PISTA ' + (PISTA || '-') + ' · CAMBIAR';
+  if ($('pistaNum')) $('pistaNum').textContent = PISTA || '';
+  if ($('chipPista')) $('chipPista').textContent = PISTA ? 'PISTA ' + PISTA : '';
   if (typeof pintarMenuExtra === 'function') pintarMenuExtra();
 }
 
@@ -715,6 +741,40 @@ function elegirSaque(paso, p, j) {
     cerrarSaque();
     cambiar();
   }
+}
+
+
+// ----- Pista: cada pista tiene su propio partido (hasta 5) -----
+function abrirPista() {
+  const caja = $('opcionesPista');
+  caja.innerHTML = '';
+  caja.style.gridTemplateColumns = 'repeat(5, 1fr)';
+  for (let n = 1; n <= PISTAS; n++) {
+    const b = document.createElement('button');
+    b.textContent = n;
+    b.style.fontSize = '2.4rem';
+    if (n === PISTA) { b.style.background = '#8dff00'; b.style.color = '#000'; }
+    b.onclick = () => elegirPista(n);
+    caja.appendChild(b);
+  }
+  $('cancelarPista').style.display = PISTA ? '' : 'none';   // la primera vez hay que elegir una
+  $('ventanaPista').classList.add('abierto');
+}
+
+function cerrarPista() { $('ventanaPista').classList.remove('abierto'); }
+
+function elegirPista(n) {
+  if (n === PISTA) { cerrarPista(); return; }
+  PISTA = n;
+  guardarLocal('pistaPadel', String(n));
+  RUTA = rutaDe(n);
+  if (esPartido) { try { esPartido.close(); } catch (e) {} esPartido = null; }
+  S = partidoNuevo(nombresIniciales(), S.cc);   // el partido de esta pista llegará de Firebase
+  enviando = false; pendiente = false; arrancado = false;
+  cerrarPista();
+  refrescar();
+  conectar();
+  setTimeout(arranque, 4000);
 }
 
 function cerrarSaque() { $('ventanaSaque').classList.remove('abierto'); }
@@ -860,7 +920,11 @@ $('archivoLogo').addEventListener('change', e => {
 // ==CAM_CORE==
 const CAM_W = 32, CAM_H = 24;
 const CAM_TAPADO_MS = 200;      // tiempo que debe durar el cambio
-const CAM_RELEARN_MS = 4000;    // si el cambio dura mucho, se vuelve a aprender la luz normal
+const CAM_VENTANA_MS = 450;     // se mira cuánto del cambio de luz ocurrió en este tiempo
+const CAM_SUBIDA_RATIO = 0.6;   // la pala entra de golpe: al menos esta parte del cambio total ocurre dentro de la ventana (alguien que pasa o se acerca lo hace más despacio; alguien parado ya no cambia)
+const CAM_CALMA_MS = 700;       // la cámara debe estar tranquila este tiempo para volver a armarse
+const CAM_CALMA_REL = 0.12;     // "tranquila" = cambio medio de luz por debajo de esto
+const CAM_RELEARN_MS = 6000;    // si queda tapada muchísimo rato, se vuelve a aprender la luz normal
 // cambio: un píxel cuenta como cambiado si su luz sube o baja más de esa fracción (y al menos 12 niveles)
 // cuanto: fracción de píxeles cambiados necesaria
 const SENSIBILIDADES = {
@@ -869,30 +933,42 @@ const SENSIBILIDADES = {
   baja:  { cambio: 0.50, cuanto: 0.75 }
 };
 
-function nuevoCam() { return { base: null, desde: 0, armado: true }; }
+function nuevoCam() { return { base: null, desde: 0, armado: true, calmaDesde: 0, hist: [] }; }
 
-// Procesa un fotograma. lum = luz de cada píxel (+1). Devuelve { frac, cubierto, disparo }
+// Procesa un fotograma. lum = luz de cada píxel (+1). Devuelve { frac, cubierto, disparo, lento, subida }
 function pasoCam(C, lum, ahora, cfg) {
   const n = lum.length;
-  if (!C.base) { C.base = Float32Array.from(lum); return { frac: 0, cubierto: false, disparo: false }; }
-  let cambiados = 0;
+  if (!C.base) { C.base = Float32Array.from(lum); return { frac: 0, cubierto: false, disparo: false, lento: false, subida: 0 }; }
+  let cambiados = 0, rel = 0;
   for (let i = 0; i < n; i++) {
     const dif = Math.abs(lum[i] - C.base[i]);
     if (dif > Math.max(cfg.cambio * C.base[i], 12)) cambiados++;
+    rel += Math.min(1, dif / C.base[i]);
   }
+  rel /= n;                                                   // cambio medio de luz (continuo)
   const frac = cambiados / n;
   const cubierto = frac >= cfg.cuanto;
-  let disparo = false;
+  // Rapidez de la entrada: cuánto subió el cambio de luz en los últimos CAM_VENTANA_MS
+  C.hist.push({ t: ahora, r: rel });
+  while (C.hist.length && ahora - C.hist[0].t > CAM_VENTANA_MS) C.hist.shift();
+  let minimo = rel;
+  for (const h of C.hist) if (h.r < minimo) minimo = h.r;
+  const subida = rel > 0.02 ? (rel - minimo) / rel : 0;      // parte del cambio total que ocurrió dentro de la ventana (0 a 1)
+  // Calma: para volver a armarse la cámara debe estar tranquila un rato (evita rebotes al irse alguien)
+  if (rel < CAM_CALMA_REL) { if (!C.calmaDesde) C.calmaDesde = ahora; } else C.calmaDesde = 0;
+  if (!C.armado && C.calmaDesde && ahora - C.calmaDesde >= CAM_CALMA_MS) C.armado = true;
+  let disparo = false, lento = false;
   if (!cubierto) {
     for (let i = 0; i < n; i++) C.base[i] += (lum[i] - C.base[i]) * 0.05;   // sigue los cambios lentos de luz
     C.desde = 0;
-    C.armado = true;
   } else {
     if (!C.desde) C.desde = ahora;
-    if (C.armado && ahora - C.desde >= CAM_TAPADO_MS) { C.armado = false; disparo = true; }
-    else if (ahora - C.desde > CAM_RELEARN_MS) { C.base = Float32Array.from(lum); C.desde = 0; C.armado = true; }
+    if (C.armado && ahora - C.desde >= CAM_TAPADO_MS) {
+      if (subida >= CAM_SUBIDA_RATIO) { C.armado = false; disparo = true; }
+      else lento = true;                                      // entró despacio: persona que pasa o se para, no un gesto
+    } else if (ahora - C.desde > CAM_RELEARN_MS) { C.base = Float32Array.from(lum); C.desde = 0; C.armado = false; C.calmaDesde = 0; }
   }
-  return { frac, cubierto, disparo };
+  return { frac, cubierto, disparo, lento, subida };
 }
 // ==/CAM_CORE==
 
@@ -946,7 +1022,8 @@ function analizarCamara() {
   for (let i = 0; i < n; i++) camLum[i] = 0.299 * d[i*4] + 0.587 * d[i*4+1] + 0.114 * d[i*4+2] + 1;
   const r = pasoCam(CAM, camLum, performance.now(), SENSIBILIDADES[sens]);
   $('camNivel').style.width = Math.min(100, Math.round(r.frac * 100)) + '%';
-  $('camara').classList.toggle('tapando', r.cubierto);
+  $('camara').classList.toggle('tapando', r.cubierto && !r.lento);
+  $('camara').classList.toggle('ignorado', r.lento);
   if (r.disparo) puntoAuto('cámara');
 }
 
@@ -1052,7 +1129,9 @@ function arrancarReconocimiento() {
       const oido = (ev.results[i][0].transcript || '').trim();
       if (oido) avisoMic('OÍ: "' + oido.toUpperCase() + '"', 1600);
       if (/anulad/.test(texto)) continue;
-      const hayPunto = /\bpunto\b/.test(texto), hayTanto = /\btanto\b/.test(texto);
+      // Chrome a veces escribe la palabra "punto" como el signo "." : se acepta si lo único oído es ese signo
+      const soloSigno = /^[\s.]*\.[\s.]*$/.test(oido);
+      const hayPunto = /\bpunto\b/.test(texto) || soloSigno, hayTanto = /\btanto\b/.test(texto);
       if (hayPunto && hayTanto) continue;   // confuso: no se suma a nadie
       if (hayPunto) oirPalabra('punto', sesion + ':' + i + ':p');
       else if (hayTanto) oirPalabra('tanto', sesion + ':' + i + ':t');
