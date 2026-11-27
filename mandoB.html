@@ -13,26 +13,25 @@
   :root {
     --fondo: #020817;
     --fondo2: #071a3d;
-    --rojo: #ff2a1f;
-    --amarillo: #ffd400;
-    --azul: #2f6bff;
     --verde: #8dff00;
+    --celeste: #3d9bff;
     --ambar: #ffc400;
+    --lima: #b8ff00;
     --tipo: 'Barlow Condensed', 'Roboto Condensed', 'Arial Narrow', Impact, sans-serif;
   }
-  body { display: flex; flex-direction: column; background: linear-gradient(180deg, var(--fondo2) 0%, var(--fondo) 55%); color: #fff; font-family: var(--tipo); text-align: center; user-select: none; -webkit-user-select: none; overflow: hidden; }
+  body { display: flex; flex-direction: column; background: radial-gradient(120% 60% at 50% 0%, #0c2a63 0%, rgba(12,42,99,0) 60%), linear-gradient(180deg, var(--fondo2) 0%, var(--fondo) 60%); color: #fff; font-family: var(--tipo); text-align: center; user-select: none; -webkit-user-select: none; overflow: hidden; }
 
   /* ===== Pelota de saque ===== */
-  .bola { width: .95em; height: .95em; flex: none; visibility: hidden; filter: drop-shadow(0 0 6px #d4ff00); }
+  .bola { width: .8em; height: .8em; flex: none; visibility: hidden; filter: drop-shadow(0 0 5px #d4ff00); }
   .bola.on { visibility: visible; }
   .bola svg { width: 100%; height: 100%; display: block; }
 
   /* ===== Tres puntitos + menú desplegable ===== */
-  #botonMenu { position: fixed; top: 14px; right: 14px; z-index: 20; width: 46px; height: 46px; border-radius: 50%; border: 2px solid var(--verde); background: rgba(0,0,0,.75); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; cursor: pointer; box-shadow: 0 0 10px rgba(141,255,0,.5); padding: 0; }
+  #botonMenu { position: fixed; top: 12px; right: 12px; z-index: 20; width: 46px; height: 46px; border-radius: 50%; border: 2px solid var(--verde); background: rgba(2,8,23,.8); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; cursor: pointer; box-shadow: 0 0 10px rgba(141,255,0,.45); padding: 0; }
   #botonMenu span { width: 6px; height: 6px; border-radius: 50%; background: var(--verde); display: block; }
   #fondoMenu { position: fixed; inset: 0; z-index: 21; display: none; }
   #fondoMenu.abierto { display: block; }
-  #listaMenu { position: absolute; top: 68px; right: 14px; background: #060d1d; border: 2px solid var(--verde); border-radius: 14px; box-shadow: 0 0 20px rgba(141,255,0,.45); overflow-y: auto; max-height: calc(100vh - 80px); min-width: 260px; max-width: calc(100vw - 28px); }
+  #listaMenu { position: absolute; top: 66px; right: 12px; background: #060d1d; border: 2px solid var(--verde); border-radius: 14px; box-shadow: 0 0 20px rgba(141,255,0,.45); overflow-y: auto; max-height: calc(100vh - 80px); min-width: 260px; max-width: calc(100vw - 24px); }
   #listaMenu button { display: block; width: 100%; text-align: left; padding: 11px 18px; font-size: 1.1rem; font-weight: 700; font-family: inherit; color: #fff; background: transparent; border: none; border-bottom: 1px solid #1b2a4a; cursor: pointer; letter-spacing: 1.5px; }
   #listaMenu button:last-child { border-bottom: none; }
   #listaMenu button:active { background: #12304a; }
@@ -53,156 +52,169 @@
   #vistaLogo { width: 140px; height: 140px; border-radius: 50%; object-fit: cover; box-shadow: 0 0 18px rgba(141,255,0,.6); background: #000; }
 
   /* ===== Punto de conexión (verde = sincronizado) ===== */
-  #conexion { position: fixed; top: 31px; right: 126px; z-index: 20; width: 10px; height: 10px; border-radius: 50%; background: #ff2a1f; box-shadow: 0 0 6px #ff2a1f; }
+  #conexion { position: fixed; top: 31px; right: 122px; z-index: 20; width: 9px; height: 9px; border-radius: 50%; background: #ff2a1f; box-shadow: 0 0 6px #ff2a1f; }
   #conexion.ok { background: #16a34a; box-shadow: 0 0 6px #16a34a; }
 
   /* ===== Botón de micrófono ===== */
-  #botonMic { position: fixed; top: 14px; right: 68px; z-index: 20; width: 46px; height: 46px; border-radius: 50%; border: 2px solid #4b5b7a; background: rgba(0,0,0,.75); display: flex; align-items: center; justify-content: center; cursor: pointer; padding: 0; }
+  #botonMic { position: fixed; top: 12px; right: 66px; z-index: 20; width: 46px; height: 46px; border-radius: 50%; border: 2px solid #4b5b7a; background: rgba(2,8,23,.8); display: flex; align-items: center; justify-content: center; cursor: pointer; padding: 0; }
   #botonMic svg { width: 24px; height: 24px; fill: #7f90b3; }
-  #botonMic.on { border-color: var(--rojo); box-shadow: 0 0 12px rgba(255,42,31,.8); animation: latido 1.4s ease-in-out infinite; }
-  #botonMic.on svg { fill: var(--rojo); }
-  @keyframes latido { 0%, 100% { box-shadow: 0 0 6px rgba(255,42,31,.6); } 50% { box-shadow: 0 0 18px rgba(255,42,31,1); } }
-  #avisoMic { position: fixed; top: 68px; left: 12px; right: 12px; z-index: 22; padding: 8px 12px; border-radius: 12px; background: rgba(0,0,0,.88); border: 2px solid var(--rojo); color: #fff; font-size: 1.1rem; font-weight: 700; letter-spacing: 1px; display: none; }
+  #botonMic.on { border-color: var(--lima); box-shadow: 0 0 12px rgba(184,255,0,.8); animation: latido 1.4s ease-in-out infinite; }
+  #botonMic.on svg { fill: var(--lima); }
+  @keyframes latido { 0%, 100% { box-shadow: 0 0 6px rgba(184,255,0,.5); } 50% { box-shadow: 0 0 18px rgba(184,255,0,1); } }
+  #avisoMic { position: fixed; top: 66px; left: 12px; right: 12px; z-index: 22; padding: 8px 12px; border-radius: 12px; background: rgba(2,8,23,.94); border: 2px solid var(--lima); color: #fff; font-size: 1.15rem; font-weight: 700; letter-spacing: 1px; display: none; text-transform: uppercase; }
   #avisoMic.on { display: block; }
 
-  /* ===== Cabecera: logo + mini marcador ===== */
-  .cabecera { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; padding: 8px 128px 8px 10px; border-bottom: 3px solid var(--verde); box-shadow: 0 4px 14px rgba(141,255,0,.2); }
-  .logo { height: 54px; width: 54px; border-radius: 50%; object-fit: cover; flex: none; box-shadow: 0 0 10px rgba(141,255,0,.55); -webkit-touch-callout: none; touch-action: manipulation; }
-  .tablero { border-collapse: collapse; flex: 1; min-width: 0; }
-  .tablero th { font-size: .85rem; color: var(--verde); letter-spacing: 1.5px; font-weight: 700; padding: 0 4px; }
-  .tablero td { padding: 1px 6px; font-size: 2rem; font-weight: 800; line-height: 1.1; }
-  .tablero td.eq { font-size: 1.2rem; width: 1.6em; }
-  .tablero tr.fA td { color: #ff5a50; }
-  .tablero tr.fB td { color: #5aa0ff; }
-  .tablero tr.mio td { background: rgba(141,255,0,.14); }
-
-  .extra { display: none; flex: 0 0 calc(100% + 118px); margin-right: -118px; align-items: center; justify-content: center; gap: 14px; }
-  .extra.on { display: flex; }
-  .tbMando { display: none; padding: .05em .45em; border-radius: .3em; font-size: 1.5rem; font-weight: 800; letter-spacing: .06em; color: #1a1300; background: var(--ambar); box-shadow: 0 0 12px rgba(255,196,0,.8); animation: pulsoTB 1.2s ease-in-out infinite; flex: none; }
+  /* ===== Cabecera: logo + estado ===== */
+  .cab { display: flex; align-items: center; gap: 12px; flex: none; padding: 10px 124px 8px 14px; min-height: 70px; }
+  .logo { height: 52px; width: 52px; border-radius: 50%; object-fit: cover; flex: none; border: 2px solid var(--verde); box-shadow: 0 0 12px rgba(141,255,0,.55); -webkit-touch-callout: none; touch-action: manipulation; }
+  .cab-info { flex: 1; min-width: 0; display: flex; align-items: center; justify-content: flex-start; gap: 10px; flex-wrap: wrap; }
+  .subtitulo { font-size: 1.15rem; font-weight: 700; letter-spacing: .09em; color: var(--verde); text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+  .tbMando { display: none; padding: .02em .5em; border-radius: .3em; font-size: 1.5rem; font-weight: 800; letter-spacing: .06em; color: #1a1300; background: var(--ambar); box-shadow: 0 0 12px rgba(255,196,0,.8); animation: pulsoTB 1.2s ease-in-out infinite; }
   .tbMando.on { display: inline-block; }
   @keyframes pulsoTB { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); } }
-  .hist { display: flex; flex-direction: row; align-items: baseline; flex-wrap: wrap; justify-content: center; gap: 4px 12px; text-align: center; font-size: 1.15rem; font-weight: 700; color: var(--amarillo); letter-spacing: 1px; line-height: 1.1; }
-  .hist small { font-size: .75rem; color: #8fa6cf; font-weight: 600; }
-  .hist b { font-weight: 700; white-space: nowrap; }
-  .cambio { display: none; width: 40px; height: 40px; flex: none; filter: drop-shadow(0 0 6px var(--verde)); animation: parpadeo 1s infinite; }
+  .cambio { display: none; width: 34px; height: 34px; filter: drop-shadow(0 0 6px var(--verde)); animation: parpadeo 1s infinite; }
   .cambio svg { width: 100%; height: 100%; display: block; }
   @keyframes parpadeo { 0%, 100% { opacity: 1; } 50% { opacity: .35; } }
 
-  /* ===== Mini marcador por parejas ===== */
-  .mini { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 8px; border-bottom: 3px solid #1b2a4a; }
-  .caja { padding: 6px 4px 8px; border-radius: 14px; border: 2px solid #1b2a4a; border-top: 5px solid transparent; background: rgba(255,255,255,.04); min-width: 0; }
-  .caja.A { border-top-color: #ff2a2a; }
-  .caja.B { border-top-color: #2a8bff; }
-  .caja.mio { background: rgba(141,255,0,.1); border-color: var(--verde); box-shadow: 0 0 14px rgba(141,255,0,.35); }
-  .nombres { display: flex; flex-direction: column; gap: 2px; }
-  .nombres div { display: flex; align-items: center; justify-content: flex-start; gap: 6px; font-size: 1.3rem; font-weight: 800; color: #fff; white-space: nowrap; overflow: hidden; padding: 0 6px; text-transform: uppercase; letter-spacing: .5px; }
-  .nombres div span { overflow: hidden; text-overflow: ellipsis; }
-  .puntos { position: relative; margin: 6px auto 0; width: 82%; border-radius: 10px; color: #0a0a0a; font-size: 3.6rem; font-weight: 800; line-height: 1.12;
-    background: linear-gradient(180deg, #ffffff 0%, #ececec 49%, #bdbdbd 49.5%, #e6e6e6 51%, #f7f7f7 100%); box-shadow: 0 5px 10px rgba(0,0,0,.6); }
-  .puntos::before { content: ''; position: absolute; left: 0; right: 0; top: 49.3%; height: 3px; background: rgba(0,0,0,.5); }
-  .puntos.ad { font-size: 2.9rem; padding: .08em 0; }
+  /* ===== Mini marcador: nombres | punto | sets ===== */
+  .cuerpo { flex: none; display: grid; grid-template-columns: minmax(0, 1fr) 86px var(--wSets); grid-template-rows: 22px auto auto; gap: 0 8px; padding: 0 12px;
+    --wSets: calc(var(--n, 3) * 36px); }
+  .cabSet { grid-column: 3; display: grid; grid-template-columns: repeat(var(--n, 3), 1fr); align-items: end; font-size: .7rem; font-weight: 700; letter-spacing: .03em; color: var(--verde); text-shadow: 0 0 8px rgba(141,255,0,.5); }
+  .cabSet div { white-space: nowrap; line-height: 1; min-width: 0; text-align: center; overflow: hidden; }
+  .cabSet .tbmini { display: block; color: var(--ambar); text-shadow: none; font-size: .9em; }
 
-  /* ===== Botones 3D realistas (sin cambios) ===== */
-  .mas, .menos { position: relative; border: none; color: #fff; font-family: 'Arial Black', Arial, sans-serif; line-height: 1; cursor: pointer; overflow: hidden; touch-action: manipulation; transition: transform .07s ease, box-shadow .07s ease, filter .07s ease; }
+  .eq { position: relative; display: flex; flex-direction: column; justify-content: center; gap: 2px; margin: 5px 0; padding: 0 30px 0 12px; min-width: 0; text-align: left;
+    border-left: 4px solid #22345a; border-radius: 4px 0 0 4px;
+    background: linear-gradient(90deg, rgba(255,255,255,.07), rgba(255,255,255,0)); }
+  .eq.mio { border-left-color: var(--verde); background: linear-gradient(90deg, rgba(141,255,0,.2), rgba(141,255,0,0)); box-shadow: -6px 0 14px -6px rgba(141,255,0,.7); }
+  .eq div { display: flex; align-items: center; gap: .4em; font-size: 1.25rem; font-weight: 800; letter-spacing: .02em; text-transform: uppercase; white-space: nowrap; overflow: hidden; line-height: 1.1; }
+  .eq div span { overflow: hidden; text-overflow: ellipsis; }
+  /* Letra pequeña: P = esta pareja dice "punto", T = la otra dice "tanto" */
+  .vl { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); width: 20px; height: 20px; border-radius: 50%; border: 1.5px solid #4b5b7a; color: #8fa6cf; font-size: .72rem; font-weight: 800; line-height: 17px; text-align: center; }
+  .eq.mio .vl { border-color: var(--verde); color: var(--verde); }
+
+  .punto { position: relative; margin: 5px 0; display: flex; align-items: center; justify-content: center; border-radius: 9px; color: #0a0a0a; font-weight: 800; line-height: 1; font-size: 3.1rem; min-height: 80px; overflow: hidden;
+    background: linear-gradient(180deg, #ffffff 0%, #ececec 49.2%, #bdbdbd 49.4%, #e6e6e6 50.6%, #f7f7f7 100%);
+    box-shadow: 0 5px 10px rgba(0,0,0,.65), inset 0 0 8px rgba(0,0,0,.16); }
+  .punto::before { content: ''; position: absolute; left: 0; right: 0; top: 49.4%; height: 3px; background: rgba(0,0,0,.5); }
+  .punto span { position: relative; z-index: 1; transform: translateY(-.02em); }
+  .punto.ad { font-size: 2.5rem; }
+
+  .sets { margin: 5px 0; display: grid; grid-template-columns: repeat(var(--n, 3), 1fr); }
+  .sets div { display: flex; align-items: center; justify-content: center; font-size: 2.1rem; font-weight: 800; line-height: 1; color: #fff; text-shadow: 0 0 8px rgba(255,255,255,.3); }
+  .sets div.futuro { color: var(--celeste); text-shadow: 0 0 8px rgba(61,155,255,.35); }
+  .sets div.actual { text-shadow: 0 0 14px rgba(141,255,0,.85), 0 0 3px #fff; }
+  .sets div.pierde { color: #b7c3dc; text-shadow: none; }
+
+  /* ===== Cronómetro ===== */
+  .pie { flex: none; display: flex; align-items: baseline; justify-content: flex-end; gap: 10px; margin: 4px 12px 0; padding: 4px 4px 0; border-top: 2px solid var(--verde); box-shadow: 0 -4px 12px rgba(141,255,0,.2); }
+  .pie small { font-size: .85rem; font-weight: 700; letter-spacing: .2em; color: var(--verde); }
+  .pie b { font-size: 1.7rem; font-weight: 800; letter-spacing: .06em; font-variant-numeric: tabular-nums; text-shadow: 0 0 8px rgba(255,255,255,.35); }
+
+  /* ===== Cámara: franja discreta (sigue captando, no enseña la imagen) ===== */
+  .camara { position: relative; flex: none; height: 50px; margin: 10px 12px 0; border-radius: 14px; overflow: hidden; border: 2px solid #2a4a2a; background: rgba(2,8,23,.7); display: flex; align-items: center; padding: 0 14px; cursor: pointer; transition: background .15s ease, border-color .15s ease; }
+  .camara video { position: absolute; left: 0; top: 0; width: 2px; height: 2px; opacity: 0; pointer-events: none; }
+  .camTexto { display: flex; align-items: center; gap: 10px; font-size: 1.05rem; font-weight: 700; letter-spacing: .14em; color: #9db0d0; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .camTexto::before { content: ''; width: 12px; height: 12px; border-radius: 50%; flex: none; background: var(--verde); box-shadow: 0 0 8px var(--verde); }
+  .camBarra { position: absolute; left: 0; right: 0; bottom: 0; height: 4px; background: rgba(255,255,255,.1); }
+  .camBarra i { display: block; height: 100%; width: 0; background: var(--verde); }
+  .camara.tapando { border-color: var(--ambar); }
+  .camara.tapando .camTexto::before { background: var(--ambar); box-shadow: 0 0 10px var(--ambar); }
+  .camara.punto { background: var(--lima); border-color: #fff; }
+  .camara.punto .camTexto { color: #06210f; }
+  .camara.punto .camTexto::before { background: #06210f; box-shadow: none; }
+
+  /* ===== Botones 3D: más en verde limón, menos en azul oscuro con borde blanco ===== */
+  .botones { flex: 1; min-height: 110px; display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 14px 12px 26px; }
+  .mas, .menos { position: relative; border: none; font-family: 'Arial Black', Arial, sans-serif; line-height: 1; cursor: pointer; overflow: hidden; touch-action: manipulation; width: 100%; height: 100%; margin: 0; border-radius: 22px; transition: transform .07s ease, box-shadow .07s ease, filter .07s ease; }
   .mas::before, .menos::before { content: ''; position: absolute; left: 4%; right: 4%; top: 2%; height: 42%; border-radius: 50% 50% 50% 50% / 100% 100% 60% 60%; background: linear-gradient(180deg, rgba(255,255,255,.55) 0%, rgba(255,255,255,.12) 70%, rgba(255,255,255,0) 100%); pointer-events: none; }
   .mas::after, .menos::after { content: ''; position: absolute; left: 12%; right: 12%; bottom: 3%; height: 14%; border-radius: 50%; background: linear-gradient(0deg, rgba(255,255,255,.22), rgba(255,255,255,0)); pointer-events: none; }
 
-  .mas { width: 100%; height: 100%; margin: 0; border-radius: 22px; font-size: 5.5rem;
-    background: radial-gradient(120% 90% at 50% 0%, #6dff9a 0%, #22c55e 28%, #15803d 68%, #0b4f26 100%);
-    text-shadow: 0 -3px 0 rgba(255,255,255,.25), 0 6px 8px rgba(0,0,0,.55), 0 0 18px rgba(190,255,210,.35);
+  .mas { font-size: 5.5rem; color: #06210f;
+    background: radial-gradient(120% 90% at 50% 0%, #f1ff9a 0%, #c8ff1a 30%, #8fd400 68%, #4d7d00 100%);
+    text-shadow: 0 2px 0 rgba(255,255,255,.45), 0 0 14px rgba(230,255,140,.45);
     box-shadow:
-      inset 0 3px 2px rgba(255,255,255,.65),
-      inset 0 -10px 18px rgba(0,40,15,.65),
-      inset 6px 0 14px rgba(0,60,25,.35),
-      inset -6px 0 14px rgba(0,60,25,.35),
-      0 10px 0 #0a3d1c,
-      0 14px 0 #062a13,
+      inset 0 3px 2px rgba(255,255,255,.7),
+      inset 0 -10px 18px rgba(40,70,0,.55),
+      inset 6px 0 14px rgba(60,100,0,.3),
+      inset -6px 0 14px rgba(60,100,0,.3),
+      0 10px 0 #3f6b00,
+      0 14px 0 #2a4a00,
       0 22px 28px rgba(0,0,0,.85),
-      0 0 24px rgba(34,197,94,.35); }
+      0 0 24px rgba(184,255,0,.35); }
   .mas:active { transform: translateY(8px);
     box-shadow:
-      inset 0 3px 2px rgba(255,255,255,.4),
-      inset 0 -6px 14px rgba(0,40,15,.7),
-      inset 0 10px 22px rgba(0,30,10,.5),
-      0 2px 0 #0a3d1c,
-      0 4px 0 #062a13,
+      inset 0 3px 2px rgba(255,255,255,.45),
+      inset 0 -6px 14px rgba(40,70,0,.6),
+      inset 0 10px 22px rgba(30,50,0,.45),
+      0 2px 0 #3f6b00,
+      0 4px 0 #2a4a00,
       0 8px 12px rgba(0,0,0,.8),
-      0 0 14px rgba(34,197,94,.25);
-    filter: brightness(.93); }
-  .menos { width: 100%; height: 100%; margin: 0; border-radius: 22px; font-size: 4.5rem;
-    background: radial-gradient(120% 110% at 50% 0%, #ff8a80 0%, #ef4444 30%, #b91c1c 70%, #6b0f0f 100%);
-    text-shadow: 0 -2px 0 rgba(255,255,255,.25), 0 4px 6px rgba(0,0,0,.55), 0 0 12px rgba(255,200,200,.3);
+      0 0 14px rgba(184,255,0,.25);
+    filter: brightness(.94); }
+  .menos { font-size: 4.5rem; color: #fff; border: 3px solid #fff;
+    background: radial-gradient(120% 110% at 50% 0%, #3b66c4 0%, #1d3f85 32%, #0f2859 70%, #071634 100%);
+    text-shadow: 0 -2px 0 rgba(255,255,255,.2), 0 4px 6px rgba(0,0,0,.55), 0 0 12px rgba(160,200,255,.35);
     box-shadow:
-      inset 0 2px 2px rgba(255,255,255,.65),
-      inset 0 -7px 12px rgba(70,0,0,.65),
-      inset 4px 0 10px rgba(90,0,0,.35),
-      inset -4px 0 10px rgba(90,0,0,.35),
-      0 7px 0 #7a1010,
-      0 10px 0 #4d0a0a,
+      inset 0 2px 2px rgba(255,255,255,.55),
+      inset 0 -7px 12px rgba(0,10,40,.65),
+      inset 4px 0 10px rgba(0,10,50,.35),
+      inset -4px 0 10px rgba(0,10,50,.35),
+      0 7px 0 #04122c,
+      0 10px 0 #020a1a,
       0 16px 20px rgba(0,0,0,.85),
-      0 0 18px rgba(239,68,68,.3); }
+      0 0 18px rgba(61,155,255,.3); }
   .menos:active { transform: translateY(6px);
     box-shadow:
-      inset 0 2px 2px rgba(255,255,255,.4),
-      inset 0 -4px 10px rgba(70,0,0,.7),
-      inset 0 8px 16px rgba(50,0,0,.5),
-      0 1px 0 #7a1010,
-      0 3px 0 #4d0a0a,
+      inset 0 2px 2px rgba(255,255,255,.35),
+      inset 0 -4px 10px rgba(0,10,40,.7),
+      inset 0 8px 16px rgba(0,5,30,.5),
+      0 1px 0 #04122c,
+      0 3px 0 #020a1a,
       0 6px 9px rgba(0,0,0,.8),
-      0 0 10px rgba(239,68,68,.2);
-    filter: brightness(.93); }
-
-  /* ===== Zona de cámara (suma el punto al acercar la pala) ===== */
-  .camara { position: relative; flex: 1; min-height: 0; margin: 12px 12px 18px; border-radius: 22px; overflow: hidden; border: 3px solid var(--verde); background: #040d1c; box-shadow: 0 0 18px rgba(141,255,0,.35); cursor: pointer; transition: background .15s ease, border-color .15s ease; }
-  .camara video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: .45; }
-  .camTexto { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 12px; font-size: 1.6rem; font-weight: 700; letter-spacing: 2px; color: var(--verde); text-shadow: 0 0 10px rgba(0,0,0,.9); pointer-events: none; }
-  .camBarra { position: absolute; left: 12px; right: 12px; bottom: 10px; height: 8px; border-radius: 4px; background: rgba(255,255,255,.15); overflow: hidden; }
-  .camBarra i { display: block; height: 100%; width: 0; background: var(--verde); }
-  .camara.tapando { border-color: var(--amarillo); }
-  .camara.punto { background: #22c55e; border-color: #fff; }
-  .camara.punto .camTexto { color: #000; text-shadow: none; font-size: 3.4rem; }
-  .botones { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 0 12px 28px; height: 120px; flex: none; }
+      0 0 10px rgba(61,155,255,.2);
+    filter: brightness(.94); }
 </style>
 </head>
 <body>
 
-<div class="cabecera">
+<div class="cab">
   <img class="logo" id="logo" src="logo.jpg" alt="Logo" onerror="this.style.display='none'" oncontextmenu="return false">
-  <table class="tablero">
-    <tr><th></th><th>SETS</th><th>JUEGOS</th><th>PUNTO</th></tr>
-    <tr class="fA" id="filaA"><td class="eq">A</td><td id="tsA">0</td><td id="tjA">0</td><td id="tpA">0</td></tr>
-    <tr class="fB" id="filaB"><td class="eq">B</td><td id="tsB">0</td><td id="tjB">0</td><td id="tpB">0</td></tr>
-  </table>
-  <div class="extra" id="extra">
-  <div class="tbMando" id="tbMando">T.B.</div>
-    <div class="hist" id="hist"></div>
-    <div class="cambio" id="cambio">
+  <div class="cab-info">
+    <div class="subtitulo" id="subtitulo">&nbsp;</div>
+    <span class="tbMando" id="tbMando">T.B.</span>
+    <span class="cambio" id="cambio">
       <svg viewBox="0 0 100 100" fill="none" stroke="#8dff00" stroke-width="9" stroke-linecap="round">
         <path d="M 22 50 A 28 28 0 0 1 78 50"/>
         <path d="M 78 50 A 28 28 0 0 1 22 50"/>
         <polygon points="66,46 90,46 78,62" fill="#8dff00" stroke-width="3" stroke-linejoin="round"/>
         <polygon points="10,54 34,54 22,38" fill="#8dff00" stroke-width="3" stroke-linejoin="round"/>
       </svg>
-    </div>
+    </span>
   </div>
 </div>
 
-<div class="mini">
-  <div id="cajaA" class="caja A">
-    <div class="nombres">
-      <div id="nA0"><i class="bola"></i><span></span></div>
-      <div id="nA1"><i class="bola"></i><span></span></div>
-    </div>
-    <div class="puntos" id="puntosA">0</div>
+<div class="cuerpo" id="cuerpo">
+  <div></div><div></div><div class="cabSet" id="cabSet"></div>
+
+  <div class="eq" id="eqA">
+    <div id="nA0"><i class="bola"></i><span></span></div>
+    <div id="nA1"><i class="bola"></i><span></span></div>
+    <span class="vl" id="vlA">P</span>
   </div>
-  <div id="cajaB" class="caja B">
-    <div class="nombres">
-      <div id="nB0"><i class="bola"></i><span></span></div>
-      <div id="nB1"><i class="bola"></i><span></span></div>
-    </div>
-    <div class="puntos" id="puntosB">0</div>
+  <div class="punto" id="puntosA"><span>0</span></div>
+  <div class="sets" id="setsA"></div>
+
+  <div class="eq" id="eqB">
+    <div id="nB0"><i class="bola"></i><span></span></div>
+    <div id="nB1"><i class="bola"></i><span></span></div>
+    <span class="vl" id="vlB">T</span>
   </div>
+  <div class="punto" id="puntosB"><span>0</span></div>
+  <div class="sets" id="setsB"></div>
 </div>
+
+<div class="pie"><small>TIEMPO</small><b id="crono">00:00:00</b></div>
 
 <div class="camara" id="camara">
   <video id="video" playsinline muted autoplay></video>
@@ -216,7 +228,7 @@
 </div>
 
 <div id="conexion" title="Conexión"></div>
-<button id="botonMic" onclick="alternarMic()" aria-label="Micrófono: decir punto">
+<button id="botonMic" onclick="alternarMic()" aria-label="Micrófono: decir punto o tanto">
   <svg viewBox="0 0 24 24"><path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11h-2z"/></svg>
 </button>
 <div id="avisoMic"></div>
@@ -230,7 +242,6 @@
     <button id="botonVoz" onclick="alternarVoz(); cerrarListaMenu()">VOZ: SÍ</button>
     <button id="botonCamara" onclick="alternarCamara(); cerrarListaMenu()">CÁMARA: SÍ</button>
     <button id="botonSens" onclick="alternarSens()">SENSIBILIDAD: ALTA</button>
-    <button id="botonMicVol" onclick="alternarMicVol()">VOLUMEN MÍNIMO VOZ: MEDIO</button>
     <button onclick="cerrarListaMenu(); abrirLogo()">CAMBIAR LOGO</button>
     <button id="botonPantalla" onclick="pantallaCompleta(); cerrarListaMenu()">PANTALLA COMPLETA</button>
     <button onclick="deshacer(); cerrarListaMenu()">DESHACER</button>
@@ -750,47 +761,70 @@ document.addEventListener('visibilitychange', () => { if (!document.hidden) pant
 // Pareja a la que suma este mando ahora: se invierte en cada cambio de cancha
 function parejaActual() { return (S.lados % 2 === 0) ? PAREJA : otro(PAREJA); }
 
+// Marca la pareja del lado de este mando (la que dice "punto", letra P); la otra dice "tanto" (T)
 function marcarMia() {
   const p = parejaActual();
   ['A', 'B'].forEach(x => {
     const on = x === p;
-    $('caja' + x).classList.toggle('mio', on);
-    $('fila' + x).classList.toggle('mio', on);
+    $('eq' + x).classList.toggle('mio', on);
+    $('vl' + x).textContent = on ? 'P' : 'T';
   });
 }
 
-function pintarHistorial() {
-  const h = textoHistorial();
-  const el = $('hist');
-  if (!h.length) { el.innerHTML = ''; el.style.display = 'none'; return; }
-  el.style.display = 'flex';
-  el.innerHTML = '<small>SETS</small>' + h.map(x => '<b>' + x + '</b>').join('');
+function pintarPuntos(p) {
+  const t = textoPuntos(p);
+  const el = $('puntos' + p);
+  el.querySelector('span').textContent = t === 'VENTAJA' ? 'AD' : t;
+  el.classList.toggle('ad', t === 'VENTAJA');
 }
+
+// Columnas de sets: terminados (blanco), el actual (brillo) y los que faltan (azul)
+function pintarSets() {
+  const ant = S.ant || [];
+  const n = Math.max(3, Math.min(5, ant.length + 1));
+  $('cuerpo').style.setProperty('--n', n);
+  let cab = '', fa = '', fb = '';
+  for (let i = 0; i < n; i++) {
+    let a, b, ca = '', cb = '', tb = false;
+    if (i < ant.length) {
+      a = ant[i].A; b = ant[i].B; tb = !!ant[i].tb;
+      ca = a > b ? 'gana' : 'pierde'; cb = b > a ? 'gana' : 'pierde';
+    } else if (i === ant.length) {
+      a = S.juegos.A; b = S.juegos.B; ca = cb = 'actual';
+      tb = S.tb;
+    } else {
+      a = 0; b = 0; ca = cb = 'futuro';
+    }
+    cab += '<div>SET ' + (i + 1) + (tb ? '<span class="tbmini">T.B.</span>' : '') + '</div>';
+    fa += '<div class="' + ca + '">' + a + '</div>';
+    fb += '<div class="' + cb + '">' + b + '</div>';
+  }
+  $('cabSet').innerHTML = cab;
+  $('setsA').innerHTML = fa;
+  $('setsB').innerHTML = fb;
+}
+
+function pintarCrono() { $('crono').textContent = textoCrono(); }
+function alTick() { pintarCrono(); }
 
 function refrescar() {
-  ['A', 'B'].forEach(p => {
-    const t = textoPuntos(p);
-    const corto = t === 'VENTAJA' ? 'AD' : t;
-    $('puntos' + p).textContent = corto;
-    $('puntos' + p).classList.toggle('ad', t === 'VENTAJA');
-    $('tp' + p).textContent = corto;
-    $('tj' + p).textContent = S.juegos[p];
-    $('ts' + p).textContent = S.sets[p];
-  });
+  pintarPuntos('A');
+  pintarPuntos('B');
+  pintarSets();
+  const a = S.pts.A, b = S.pts.B;
+  $('subtitulo').innerHTML = S.msg || (S.tb ? 'JUEGO DECISIVO' : ((a >= 3 && b >= 3 && a === b) ? 'IGUALES' : '&nbsp;'));
   $('tbMando').classList.toggle('on', !!S.tb);
+  $('cambio').style.display = S.cambio ? 'inline-block' : 'none';
   pintarNombres();
   pintarBola();
   marcarMia();
-  pintarHistorial();
-  $('cambio').style.display = S.cambio ? 'block' : 'none';
-  $('extra').classList.toggle('on', !!(S.tb || S.cambio || (S.ant && S.ant.length)));
+  pintarCrono();
   pintarMenu();
 }
 
 function pintarMenuExtra() {
   $('botonCamara').textContent = 'CÁMARA: ' + (camActiva ? 'SÍ' : 'NO');
   $('botonSens').textContent = 'SENSIBILIDAD: ' + sens.toUpperCase();
-  $('botonMicVol').textContent = 'VOLUMEN MÍNIMO VOZ: ' + micVol.toUpperCase();
 }
 
 // ===== Logo: mantener pulsado 2 segundos para editarlo =====
@@ -949,14 +983,15 @@ if (camActiva) iniciarCamara(); else textoCam('CÁMARA APAGADA · TOCA PARA ACTI
 const AUTO_BLOQUEO_MS = 2000;
 let autoBloqueoHasta = 0;
 
-function puntoAuto(origen) {
+// pareja: a quién suma. Si no se indica, la pareja de este mando (la del lado del mando).
+function puntoAuto(origen, pareja) {
   const ahora = performance.now();
   if (ahora < autoBloqueoHasta) return false;
   // No sumar si hay una ventana o el menú abiertos
   if (document.querySelector('.ventana.abierto') || $('fondoMenu').classList.contains('abierto')) return false;
   autoBloqueoHasta = ahora + AUTO_BLOQUEO_MS;
   if (navigator.vibrate) navigator.vibrate(60);
-  accionPunto(parejaActual());
+  accionPunto(pareja || parejaActual());
   const c = $('camara');
   c.classList.add('punto');
   textoCam('¡PUNTO!');
@@ -969,14 +1004,11 @@ function puntoAuto(origen) {
 function alHablar() { autoBloqueoHasta = Math.max(autoBloqueoHasta, performance.now() + 3500); }
 function alRecibir() { autoBloqueoHasta = Math.max(autoBloqueoHasta, performance.now() + 2500); }
 
-// ===== MICRÓFONO: al oír "punto" suma un punto (solo si se oye fuerte y cerca) =====
-// El reconocimiento de voz del navegador (Chrome) entiende la palabra; un medidor de volumen aparte
-// descarta lo que suena flojo (el equipo de enfrente, a más de ~3 m). El volumen mínimo se ajusta en el menú.
-const MIC_UMBRALES = { bajo: 0.012, medio: 0.03, alto: 0.07 };   // volumen (RMS) mínimo
-const MIC_VENTANA_MS = 1800;                                     // se mira el volumen de justo antes de oír la palabra
-let micActivo = false, micVol = MIC_UMBRALES[leerLocal('micVolPadel')] ? leerLocal('micVolPadel') : 'medio';
-let micRec = null, micStream = null, micAudioCtx = null, micAnalizador = null, micTimer = null;
-let micHistorial = [], micVisto = 0, micSesion = 0, micContadas = {}, micTextoAviso = null;
+// ===== MICRÓFONO: una pareja dice "punto" y la otra dice "tanto" =====
+// La pareja del lado de este mando dice "punto" (letra P junto a sus nombres); la del otro lado dice "tanto" (letra T).
+// Así no hace falta adivinar quién habla por el volumen: cada palabra suma a su pareja.
+// Usa el reconocimiento de voz del navegador (Chrome). Con cada frase se muestra lo que ha oído.
+let micActivo = false, micRec = null, micSesion = 0, micContadas = {}, micTextoAviso = null, micErrores = 0;
 
 function avisoMic(t, ms) {
   const a = $('avisoMic');
@@ -990,51 +1022,15 @@ function pintarMic() {
   $('botonMic').setAttribute('aria-pressed', micActivo ? 'true' : 'false');
 }
 
-function volumenReciente() {
-  const ahora = performance.now();
-  micHistorial = micHistorial.filter(m => ahora - m.t <= MIC_VENTANA_MS);
-  return micHistorial.reduce((mx, m) => Math.max(mx, m.v), 0);
-}
+// Qué dice cada pareja ahora mismo
+function palabraDe(pareja) { return pareja === parejaActual() ? 'punto' : 'tanto'; }
 
-function medirVolumen() {
-  if (!micAnalizador) return;
-  const buf = new Float32Array(micAnalizador.fftSize);
-  micAnalizador.getFloatTimeDomainData(buf);
-  let s = 0;
-  for (let i = 0; i < buf.length; i++) s += buf[i] * buf[i];
-  const v = Math.sqrt(s / buf.length);
-  micHistorial.push({ t: performance.now(), v });
-  if (v > micVisto) micVisto = v;
-}
-
-async function iniciarMedidor() {
-  try {
-    micStream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false }, video: false });
-    const AC = window.AudioContext || window.webkitAudioContext;
-    micAudioCtx = new AC();
-    const fuente = micAudioCtx.createMediaStreamSource(micStream);
-    micAnalizador = micAudioCtx.createAnalyser();
-    micAnalizador.fftSize = 1024;
-    fuente.connect(micAnalizador);
-    micTimer = setInterval(medirVolumen, 60);
-  } catch (e) { micAnalizador = null; }   // sin medidor: se acepta la palabra sin filtrar por volumen
-}
-
-function pararMedidor() {
-  clearInterval(micTimer); micTimer = null;
-  if (micStream) { micStream.getTracks().forEach(t => t.stop()); micStream = null; }
-  if (micAudioCtx) { try { micAudioCtx.close(); } catch (e) {} micAudioCtx = null; }
-  micAnalizador = null; micHistorial = []; micVisto = 0;
-}
-
-function oirPunto(clave) {
+function oirPalabra(palabra, clave) {
   if (micContadas[clave]) return;           // una frase cuenta una sola vez aunque llegue en trozos
   micContadas[clave] = true;
-  // Filtro de volumen (solo si el medidor está recibiendo sonido de verdad)
-  if (micAnalizador && micVisto > 0) {
-    if (volumenReciente() < MIC_UMBRALES[micVol]) { avisoMic('"PUNTO" MUY FLOJO · IGNORADO'); return; }
-  }
-  puntoAuto('voz');
+  const mia = parejaActual();
+  const pareja = palabra === 'punto' ? mia : otro(mia);
+  puntoAuto('voz', pareja);
 }
 
 function arrancarReconocimiento() {
@@ -1046,34 +1042,46 @@ function arrancarReconocimiento() {
   micRec.lang = 'es-ES';
   micRec.continuous = true;
   micRec.interimResults = true;
-  micRec.maxAlternatives = 1;
+  micRec.maxAlternatives = 3;
+  micRec.onstart = () => { micErrores = 0; };
   micRec.onresult = ev => {
     for (let i = ev.resultIndex; i < ev.results.length; i++) {
-      const texto = (ev.results[i][0].transcript || '').toLowerCase();
-      if (/\bpunto\b/.test(texto) && !/anulad/.test(texto)) oirPunto(sesion + ':' + i);
+      let texto = '';
+      for (let k = 0; k < ev.results[i].length; k++) texto += ' ' + (ev.results[i][k].transcript || '');
+      texto = texto.toLowerCase();
+      const oido = (ev.results[i][0].transcript || '').trim();
+      if (oido) avisoMic('OÍ: "' + oido.toUpperCase() + '"', 1600);
+      if (/anulad/.test(texto)) continue;
+      const hayPunto = /\bpunto\b/.test(texto), hayTanto = /\btanto\b/.test(texto);
+      if (hayPunto && hayTanto) continue;   // confuso: no se suma a nadie
+      if (hayPunto) oirPalabra('punto', sesion + ':' + i + ':p');
+      else if (hayTanto) oirPalabra('tanto', sesion + ':' + i + ':t');
     }
   };
   micRec.onerror = ev => {
     if (ev.error === 'not-allowed' || ev.error === 'service-not-allowed') {
-      avisoMic('SIN PERMISO DE MICRÓFONO', 3500);
-      micActivo = false; guardarLocal('micPadel', 'no'); pararMedidor(); pintarMic();
+      avisoMic('SIN PERMISO DE MICRÓFONO · ACTÍVALO EN LOS AJUSTES DEL SITIO', 4500);
+      micActivo = false; guardarLocal('micPadel', 'no'); pintarMic();
+    } else if (ev.error === 'audio-capture') {
+      avisoMic('NO SE ENCUENTRA EL MICRÓFONO', 3500);
+    } else if (ev.error === 'network') {
+      avisoMic('EL RECONOCIMIENTO DE VOZ NECESITA INTERNET', 3500);
     }
+    micErrores++;
   };
   micRec.onend = () => {                     // Chrome corta el reconocimiento tras un silencio: se reanuda solo
-    if (micActivo && sesion === micSesion) setTimeout(() => { if (micActivo) arrancarReconocimiento(); }, 250);
+    if (micActivo && sesion === micSesion) setTimeout(() => { if (micActivo) arrancarReconocimiento(); }, micErrores > 3 ? 1500 : 250);
   };
   try { micRec.start(); } catch (e) {}
   return true;
 }
 
-async function activarMic() {
+function activarMic() {
   micActivo = true;
   guardarLocal('micPadel', 'si');
   pintarMic();
-  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { avisoMic('EL MICRÓFONO NECESITA HTTPS', 3500); micActivo = false; pintarMic(); return; }
   if (!arrancarReconocimiento()) return;
-  iniciarMedidor();
-  avisoMic('MICRÓFONO ACTIVO · DI "PUNTO"');
+  avisoMic('MICRÓFONO ACTIVO · DI "PUNTO" O "TANTO"', 2600);
 }
 
 function desactivarMic() {
@@ -1081,19 +1089,11 @@ function desactivarMic() {
   guardarLocal('micPadel', 'no');
   micSesion++;
   if (micRec) { try { micRec.onend = null; micRec.abort(); } catch (e) {} micRec = null; }
-  pararMedidor();
   pintarMic();
   avisoMic('MICRÓFONO APAGADO');
 }
 
 function alternarMic() { micActivo ? desactivarMic() : activarMic(); }
-
-function alternarMicVol() {
-  const orden = ['bajo', 'medio', 'alto'];
-  micVol = orden[(orden.indexOf(micVol) + 1) % orden.length];
-  guardarLocal('micVolPadel', micVol);
-  pintarMenu();
-}
 
 // El micrófono empieza apagado: el navegador exige un toque del usuario para dar permiso
 pintarMic();
