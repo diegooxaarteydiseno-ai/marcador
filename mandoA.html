@@ -1127,14 +1127,14 @@ function arrancarReconocimiento() {
       for (let k = 0; k < ev.results[i].length; k++) texto += ' ' + (ev.results[i][k].transcript || '');
       texto = texto.toLowerCase();
       const oido = (ev.results[i][0].transcript || '').trim();
-      if (oido) avisoMic('OÍ: "' + oido.toUpperCase() + '"', 1600);
       if (/anulad/.test(texto)) continue;
       // Chrome a veces escribe la palabra "punto" como el signo "." : se acepta si lo único oído es ese signo
       const soloSigno = /^[\s.]*\.[\s.]*$/.test(oido);
       const hayPunto = /\bpunto\b/.test(texto) || soloSigno, hayTanto = /\btanto\b/.test(texto);
       if (hayPunto && hayTanto) continue;   // confuso: no se suma a nadie
-      if (hayPunto) oirPalabra('punto', sesion + ':' + i + ':p');
-      else if (hayTanto) oirPalabra('tanto', sesion + ':' + i + ':t');
+      // Solo se muestra la palabra clave, nunca el resto de lo que se oye
+      if (hayPunto) { if (!micContadas[sesion + ':' + i + ':p']) avisoMic('PUNTO', 1200); oirPalabra('punto', sesion + ':' + i + ':p'); }
+      else if (hayTanto) { if (!micContadas[sesion + ':' + i + ':t']) avisoMic('TANTO', 1200); oirPalabra('tanto', sesion + ':' + i + ':t'); }
     }
   };
   micRec.onerror = ev => {
