@@ -919,18 +919,20 @@ $('archivoLogo').addEventListener('change', e => {
 // Después hay un descanso (bloqueo compartido con la voz) para no sumar dos veces.
 // ==CAM_CORE==
 const CAM_W = 32, CAM_H = 24;
-const CAM_TAPADO_MS = 200;      // tiempo que debe durar el cambio
-const CAM_VENTANA_MS = 450;     // se mira cuánto del cambio de luz ocurrió en este tiempo
-const CAM_SUBIDA_RATIO = 0.6;   // la pala entra de golpe: al menos esta parte del cambio total ocurre dentro de la ventana (alguien que pasa o se acerca lo hace más despacio; alguien parado ya no cambia)
+const CAM_TAPADO_MS = 150;      // tiempo que debe durar la oscuridad
+const CAM_VENTANA_MS = 450;     // se mira cuánto del cambio ocurrió en este tiempo
+const CAM_SUBIDA_RATIO = 0.25;  // la pala entra de golpe: el cambio medio de luz sube al menos esto en la ventana (alguien que pasa o se acerca lo hace más despacio)
 const CAM_CALMA_MS = 700;       // la cámara debe estar tranquila este tiempo para volver a armarse
 const CAM_CALMA_REL = 0.12;     // "tranquila" = cambio medio de luz por debajo de esto
 const CAM_RELEARN_MS = 6000;    // si queda tapada muchísimo rato, se vuelve a aprender la luz normal
-// cambio: un píxel cuenta como cambiado si su luz sube o baja más de esa fracción (y al menos 12 niveles)
-// cuanto: fracción de píxeles cambiados necesaria
+// La pala es negra y queda pegada al objetivo: oscurece mucho una parte grande de la imagen.
+// Una persona (camiseta clara, piel, fondo) oscurece poco, así que no cuenta.
+// oscuro: un píxel cuenta como oscuro si baja por debajo de esa fracción de su luz normal
+// cuanto: fracción de píxeles oscuros necesaria
 const SENSIBILIDADES = {
-  alta:  { cambio: 0.30, cuanto: 0.50 },
-  media: { cambio: 0.40, cuanto: 0.60 },
-  baja:  { cambio: 0.50, cuanto: 0.75 }
+  alta:  { oscuro: 0.50, cuanto: 0.25 },
+  media: { oscuro: 0.45, cuanto: 0.35 },
+  baja:  { oscuro: 0.40, cuanto: 0.50 }
 };
 
 function nuevoCam() { return { base: null, desde: 0, armado: true, calmaDesde: 0, hist: [] }; }
@@ -939,22 +941,20 @@ function nuevoCam() { return { base: null, desde: 0, armado: true, calmaDesde: 0
 function pasoCam(C, lum, ahora, cfg) {
   const n = lum.length;
   if (!C.base) { C.base = Float32Array.from(lum); return { frac: 0, cubierto: false, disparo: false, lento: false, subida: 0 }; }
-  let cambiados = 0, rel = 0;
+  let oscuros = 0, rel = 0;
   for (let i = 0; i < n; i++) {
-    const dif = Math.abs(lum[i] - C.base[i]);
-    if (dif > Math.max(cfg.cambio * C.base[i], 12)) cambiados++;
-    rel += Math.min(1, dif / C.base[i]);
+    if (lum[i] < cfg.oscuro * C.base[i]) oscuros++;
+    rel += Math.min(1, Math.abs(lum[i] - C.base[i]) / C.base[i]);
   }
-  rel /= n;                                                   // cambio medio de luz (continuo)
-  const frac = cambiados / n;
+  rel /= n;                                                   // cambio medio de luz (para saber si la cámara está tranquila)
+  const frac = oscuros / n;
   const cubierto = frac >= cfg.cuanto;
-  // Rapidez de la entrada: cuánto subió el cambio de luz en los últimos CAM_VENTANA_MS
+  // Rapidez de la entrada: cuánta oscuridad apareció en los últimos CAM_VENTANA_MS
   C.hist.push({ t: ahora, r: rel });
   while (C.hist.length && ahora - C.hist[0].t > CAM_VENTANA_MS) C.hist.shift();
   let minimo = rel;
   for (const h of C.hist) if (h.r < minimo) minimo = h.r;
-  const subida = rel > 0.02 ? (rel - minimo) / rel : 0;      // parte del cambio total que ocurrió dentro de la ventana (0 a 1)
-  // Calma: para volver a armarse la cámara debe estar tranquila un rato (evita rebotes al irse alguien)
+  const subida = rel - minimo;                                // cuánto cambió la luz en los últimos CAM_VENTANA_MS (rapidez de la entrada)
   if (rel < CAM_CALMA_REL) { if (!C.calmaDesde) C.calmaDesde = ahora; } else C.calmaDesde = 0;
   if (!C.armado && C.calmaDesde && ahora - C.calmaDesde >= CAM_CALMA_MS) C.armado = true;
   let disparo = false, lento = false;
@@ -965,7 +965,7 @@ function pasoCam(C, lum, ahora, cfg) {
     if (!C.desde) C.desde = ahora;
     if (C.armado && ahora - C.desde >= CAM_TAPADO_MS) {
       if (subida >= CAM_SUBIDA_RATIO) { C.armado = false; disparo = true; }
-      else lento = true;                                      // entró despacio: persona que pasa o se para, no un gesto
+      else lento = true;
     } else if (ahora - C.desde > CAM_RELEARN_MS) { C.base = Float32Array.from(lum); C.desde = 0; C.armado = false; C.calmaDesde = 0; }
   }
   return { frac, cubierto, disparo, lento, subida };
